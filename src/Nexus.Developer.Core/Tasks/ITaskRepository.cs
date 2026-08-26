@@ -1,7 +1,7 @@
 using Nexus.Developer.Core.Common.Identifiers;
-using DeveloperTask = Nexus.Developer.Core.Task.Task;
+using DeveloperTask = Nexus.Developer.Core.Tasks.Task;
 
-namespace Nexus.Developer.Core.Task;
+namespace Nexus.Developer.Core.Tasks;
 
 // Deliberately does not extend the shared IRepository<TDomain, TId> convention --
 // that interface's own method signatures (Task AddAsync(...), Task<TDomain?>

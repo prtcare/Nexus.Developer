@@ -1,7 +1,7 @@
 using Nexus.Developer.Core.Common;
 using Nexus.Developer.Core.Common.Identifiers;
 using Xunit;
-using DeveloperTask = Nexus.Developer.Core.Task.Task;
+using DeveloperTask = Nexus.Developer.Core.Tasks.Task;
 
 namespace Nexus.Developer.Core.Tests;
 

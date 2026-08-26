@@ -1,15 +1,20 @@
 using Nexus.Developer.Core.Common;
 using Nexus.Developer.Core.Common.Identifiers;
 
-namespace Nexus.Developer.Core.Task;
+namespace Nexus.Developer.Core.Tasks;
 
 // Named "Task" to match the user-specified hierarchy (Workspace > Project >
 // Subproject > Feature > Task > Subtask) verbatim. This collides by name with
-// System.Threading.Tasks.Task, which ImplicitUsings pulls in everywhere. Any file
-// that needs both async Task<T> AND this type must alias this one, e.g.
-// `using DeveloperTask = Nexus.Developer.Core.Task.Task;` and never
-// `using Nexus.Developer.Core.Task;` directly. See ITaskRepository.cs for the
-// pattern.
+// System.Threading.Tasks.Task -- but the namespace is deliberately "Tasks"
+// (plural), not "Task": a *namespace* segment named exactly "Task" would shadow
+// System.Threading.Tasks.Task for every file anywhere under Nexus.Developer.Core
+// (namespace-declaration lookup beats using-directive lookup in C#, so a sibling
+// namespace called "Task" wins over "using System.Threading.Tasks;" project-wide,
+// not just in files that reference this type -- this was caught by a real build
+// failure across four unrelated files before the namespace was renamed to
+// "Tasks"). A file that also needs the domain type under a shorter name can
+// alias it, e.g. `using DeveloperTask = Nexus.Developer.Core.Tasks.Task;` -- see
+// ITaskRepository.cs.
 public sealed class Task : AggregateRoot<TaskId>
 {
     public Task(
