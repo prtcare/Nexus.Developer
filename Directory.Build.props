@@ -1,0 +1,31 @@
+<Project>
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <!--
+    Nexus V2 boundary guard (AGENTS.md Boundary rules): Nexus.Developer.Core must
+    never reference a product domain assembly, product DbContext or Platform/
+    Intelligence directly. It holds foreign ids as plain Guids instead. This mirrors
+    Nexus.Experience's own NexusBoundaryGuard target.
+  -->
+  <Target Name="NexusDeveloperBoundaryGuard" BeforeTargets="Build">
+    <ItemGroup Condition="$(MSBuildProjectName.StartsWith('Nexus.Developer.'))">
+      <_Bad Include="@(PackageReference)"
+            Condition="$([System.String]::Copy('%(Identity)').StartsWith('Nexus.Platform.'))" />
+      <_Bad Include="@(PackageReference)"
+            Condition="$([System.String]::Copy('%(Identity)').StartsWith('Nexus.Intelligence.')) AND '%(Identity)' != 'Nexus.Intelligence.Contracts'" />
+      <_Bad Include="@(PackageReference)"
+            Condition="$([System.String]::Copy('%(Identity)').StartsWith('Nexus.Products.'))" />
+      <_Bad Include="@(ProjectReference)"
+            Condition="$([System.String]::Copy('%(Filename)').StartsWith('Nexus.Platform.')) OR $([System.String]::Copy('%(Filename)').StartsWith('Nexus.Products.'))" />
+    </ItemGroup>
+    <Error Condition="'@(_Bad)' != ''"
+           Text="Nexus.Developer boundary violation in $(MSBuildProjectName): may not reference @(_Bad->'%(Identity)', ', '). Developer holds foreign ids as plain Guids, not product types. See AGENTS.md Boundary rules." />
+  </Target>
+
+</Project>

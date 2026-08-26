@@ -58,3 +58,6 @@ Thumbs.db
 
 # Local secrets
 set-openai-key.ps1
+
+# Excel lock files
+~$*.xlsx
