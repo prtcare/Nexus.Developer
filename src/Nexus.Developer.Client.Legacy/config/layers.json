@@ -1,0 +1,134 @@
+[
+  {
+    "number": "01",
+    "name": "CORE",
+    "description": "Who can use Nexus?",
+    "status": "Started",
+    "solution": "Nexus.Platform",
+    "repository": "Nexus.Platform",
+    "path": "C:\\Personal\\Nexus.Platform",
+    "github": "https://github.com/prtcare/Nexus.Platform",
+    "module": ""
+  },
+  {
+    "number": "02",
+    "name": "DATA",
+    "description": "What information does Nexus know and store?",
+    "status": "Started",
+    "solution": "Nexus.Platform",
+    "repository": "Nexus.Platform",
+    "path": "C:\\Personal\\Nexus.Platform",
+    "github": "https://github.com/prtcare/Nexus.Platform",
+    "module": ""
+  },
+  {
+    "number": "03",
+    "name": "GOVERNANCE",
+    "description": "What rules, standards and assets govern Nexus?",
+    "status": "Not Started",
+    "solution": "Nexus.Platform",
+    "repository": "Nexus.Platform",
+    "path": "C:\\Personal\\Nexus.Platform",
+    "github": "https://github.com/prtcare/Nexus.Platform",
+    "module": ""
+  },
+  {
+    "number": "04",
+    "name": "AI",
+    "description": "How does Nexus reason?",
+    "status": "Started",
+    "solution": "Nexus.Intelligence",
+    "repository": "Nexus.Intelligence",
+    "path": "C:\\Personal\\Nexus.Intelligence",
+    "github": "",
+    "module": ""
+  },
+  {
+    "number": "05",
+    "name": "AUTOMATION",
+    "description": "How does Nexus execute processes?",
+    "status": "Not Started",
+    "solution": "Nexus.Platform",
+    "repository": "Nexus.Platform",
+    "path": "C:\\Personal\\Nexus.Platform",
+    "github": "https://github.com/prtcare/Nexus.Platform",
+    "module": ""
+  },
+  {
+    "number": "06",
+    "name": "PRODUCT CORE",
+    "description": "What common capabilities do all products reuse? Phase 1 focus: Chat Core.",
+    "status": "Started",
+    "solution": "Nexus.Platform",
+    "repository": "Nexus.Platform",
+    "path": "C:\\Personal\\Nexus.Platform",
+    "github": "https://github.com/prtcare/Nexus.Platform",
+    "module": ""
+  },
+  {
+    "number": "07",
+    "name": "DEVELOPER",
+    "description": "How does Nexus plan and build things?",
+    "status": "Started",
+    "solution": "Nexus.Developer",
+    "repository": "Nexus.Developer",
+    "path": "C:\\Personal\\Nexus.Developer",
+    "github": "",
+    "module": "C:\\Personal\\Nexus.Developer\\src\\Nexus.Developer.Client.Legacy\\layers\\07-developer\\DeveloperLayer.ps1"
+  },
+  {
+    "number": "08",
+    "name": "DELIVERY",
+    "description": "How does code become a running system?",
+    "status": "Started",
+    "solution": "Nexus.Platform",
+    "repository": "Nexus.Platform",
+    "path": "C:\\Personal\\Nexus.Platform",
+    "github": "https://github.com/prtcare/Nexus.Platform",
+    "module": ""
+  },
+  {
+    "number": "09",
+    "name": "ASSURANCE",
+    "description": "How do we prove it is correct?",
+    "status": "Not Started",
+    "solution": "Nexus.Platform",
+    "repository": "Nexus.Platform",
+    "path": "C:\\Personal\\Nexus.Platform",
+    "github": "https://github.com/prtcare/Nexus.Platform",
+    "module": ""
+  },
+  {
+    "number": "10",
+    "name": "OPERATIONS",
+    "description": "How do we keep it running?",
+    "status": "Not Started",
+    "solution": "Nexus.Platform",
+    "repository": "Nexus.Platform",
+    "path": "C:\\Personal\\Nexus.Platform",
+    "github": "https://github.com/prtcare/Nexus.Platform",
+    "module": ""
+  },
+  {
+    "number": "11",
+    "name": "EXPERIENCE",
+    "description": "How do humans and systems interact with Nexus? Phase 1 focus: reusable chat UI.",
+    "status": "Started",
+    "solution": "Nexus.Experience",
+    "repository": "Nexus.Experience",
+    "path": "C:\\Personal\\Nexus.Experience",
+    "github": "",
+    "module": ""
+  },
+  {
+    "number": "12",
+    "name": "PRODUCTS",
+    "description": "What actual solutions do users use? Phase 1 product: Developer Chat.",
+    "status": "Started",
+    "solution": "",
+    "repository": "",
+    "path": "",
+    "github": "",
+    "module": ""
+  }
+]

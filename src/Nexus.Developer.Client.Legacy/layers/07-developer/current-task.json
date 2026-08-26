@@ -1,0 +1,27 @@
+{
+  "layer": "07",
+  "layerName": "DEVELOPER",
+  "sourceOfTruth": "NEXUS_DEVELOPMENT_CONTROL.xlsx (Master Roadmap + Active Changes) at C:\\Personal\\Nexus.Developer — this file is a display mirror only, not authoritative.",
+  "lastCompleted": {
+    "changeId": "CHG-20260825-003",
+    "nodeId": "T-07-0.1.3.2",
+    "task": "Import and rework C:\\Personal\\DevTools into Nexus.Developer (copy-first, source untouched)",
+    "completedAt": "2026-08-26",
+    "result": "13 files copied verbatim with SHA-256 verification; 6 files copied and intentionally edited for current architecture (path/label corrections, layer registry rewrite). See control/migration-report-20260826.csv."
+  },
+  "milestone": "F-06-7",
+  "task": "Chat Core — conversation/session/message lifecycle, attachments, tool calls, approvals, streaming, model and memory hooks",
+  "repository": "Nexus.Platform",
+  "solution": "Nexus.Platform (schema: product_core)",
+  "model": "Not assigned",
+  "status": "IN PROGRESS",
+  "started": "2026-08-25",
+  "workflow": {
+    "design": "Active",
+    "checkpoint": "Pending",
+    "implement": "Pending",
+    "verify": "Pending",
+    "review": "Pending",
+    "commit": "Pending"
+  }
+}
