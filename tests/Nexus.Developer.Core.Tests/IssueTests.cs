@@ -1,5 +1,5 @@
 using Nexus.Developer.Core.Common.Identifiers;
-using Nexus.Developer.Core.Issue;
+using Nexus.Developer.Core.Issues;
 using Xunit;
 
 namespace Nexus.Developer.Core.Tests;

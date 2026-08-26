@@ -1,6 +1,6 @@
 using Nexus.Developer.Core.Common.Identifiers;
 
-namespace Nexus.Developer.Core.ObjectChatLink;
+namespace Nexus.Developer.Core.ObjectChatLinks;
 
 // The permanent many-to-many relationship between a Developer Chat conversation
 // (or a message range within it) and the development object(s) it produced. A real

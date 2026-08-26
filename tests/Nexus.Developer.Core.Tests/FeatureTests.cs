@@ -1,6 +1,6 @@
 using Nexus.Developer.Core.Common;
 using Nexus.Developer.Core.Common.Identifiers;
-using Nexus.Developer.Core.Feature;
+using Nexus.Developer.Core.Features;
 using Xunit;
 
 namespace Nexus.Developer.Core.Tests;

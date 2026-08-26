@@ -1,16 +1,13 @@
 using Nexus.Developer.Core.Common;
 using Nexus.Developer.Core.Common.Identifiers;
 
-namespace Nexus.Developer.Core.Issue;
+namespace Nexus.Developer.Core.Subtasks;
 
-// Universally attachable: an Issue is never permanently positioned inside the
-// Workspace > Project > Subproject > Feature > Task > Subtask hierarchy. All of its
-// positioning comes from IssueLink rows, which is why this aggregate carries no
-// parent id of its own.
-public sealed class Issue : AggregateRoot<IssueId>
+public sealed class Subtask : AggregateRoot<SubtaskId>
 {
-    public Issue(
-        IssueId id,
+    public Subtask(
+        SubtaskId id,
+        TaskId taskId,
         string title,
         string description,
         Guid createdByUserId,
@@ -19,23 +16,26 @@ public sealed class Issue : AggregateRoot<IssueId>
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
 
+        TaskId = taskId;
         Title = title.Trim();
         Description = description?.Trim() ?? string.Empty;
-        Status = IssueStatus.Open;
+        Status = DevelopmentItemStatus.New;
         CreatedByUserId = createdByUserId;
         CreatedAt = createdAt;
     }
 
-    private Issue(
-        IssueId id,
+    private Subtask(
+        SubtaskId id,
+        TaskId taskId,
         string title,
         string description,
-        IssueStatus status,
+        DevelopmentItemStatus status,
         Guid createdByUserId,
         DateTimeOffset createdAt,
         string reference)
         : base(id)
     {
+        TaskId = taskId;
         Title = title;
         Description = description;
         Status = status;
@@ -44,11 +44,13 @@ public sealed class Issue : AggregateRoot<IssueId>
         Reference = reference;
     }
 
+    public TaskId TaskId { get; }
+
     public string Title { get; private set; } = string.Empty;
 
     public string Description { get; private set; } = string.Empty;
 
-    public IssueStatus Status { get; private set; }
+    public DevelopmentItemStatus Status { get; private set; }
 
     public Guid CreatedByUserId { get; }
 
@@ -56,15 +58,16 @@ public sealed class Issue : AggregateRoot<IssueId>
 
     public string Reference { get; private set; } = string.Empty;
 
-    public static Issue Restore(
-        IssueId id,
+    public static Subtask Restore(
+        SubtaskId id,
+        TaskId taskId,
         string title,
         string description,
-        IssueStatus status,
+        DevelopmentItemStatus status,
         Guid createdByUserId,
         DateTimeOffset createdAt,
         string reference)
-        => new(id, title, description, status, createdByUserId, createdAt, reference);
+        => new(id, taskId, title, description, status, createdByUserId, createdAt, reference);
 
     public void Rename(string title)
     {
@@ -78,7 +81,7 @@ public sealed class Issue : AggregateRoot<IssueId>
         Description = description?.Trim() ?? string.Empty;
     }
 
-    public void ChangeStatus(IssueStatus status)
+    public void ChangeStatus(DevelopmentItemStatus status)
     {
         Status = status;
     }

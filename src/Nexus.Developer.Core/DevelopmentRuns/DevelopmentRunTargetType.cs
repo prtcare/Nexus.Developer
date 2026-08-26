@@ -1,4 +1,4 @@
-namespace Nexus.Developer.Core.DevelopmentRun;
+namespace Nexus.Developer.Core.DevelopmentRuns;
 
 // M-07-10.3 outcome: "RUN-##### can be allocated against a Task/Feature/Issue."
 // The DEVELOP control may be visible on more object types in the UI

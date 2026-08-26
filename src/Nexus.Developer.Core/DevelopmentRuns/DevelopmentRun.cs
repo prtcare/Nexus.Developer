@@ -1,7 +1,7 @@
 using Nexus.Developer.Core.Common;
 using Nexus.Developer.Core.Common.Identifiers;
 
-namespace Nexus.Developer.Core.DevelopmentRun;
+namespace Nexus.Developer.Core.DevelopmentRuns;
 
 // Phase 1 placeholder only. WI-07-10.3.1: "Ref, TargetType, TargetId, Status,
 // CreatedByUserId, CreatedAt only. Plan/Prompt/Result/Report/Check/Verification

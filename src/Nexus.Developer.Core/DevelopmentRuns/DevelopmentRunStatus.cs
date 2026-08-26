@@ -1,4 +1,4 @@
-namespace Nexus.Developer.Core.DevelopmentRun;
+namespace Nexus.Developer.Core.DevelopmentRuns;
 
 // Phase 1 only ever creates NotStarted rows -- the DEVELOP action is visible but
 // does not execute (WI-07-10.3.2 / M-07-10.3 acceptance: "clearly labelled as

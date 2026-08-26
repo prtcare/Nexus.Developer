@@ -1,5 +1,5 @@
 using Nexus.Developer.Core.Common.Identifiers;
-using Nexus.Developer.Core.Milestone;
+using Nexus.Developer.Core.Milestones;
 using Xunit;
 
 namespace Nexus.Developer.Core.Tests;

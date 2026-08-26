@@ -1,7 +1,7 @@
 using Nexus.Developer.Core.Common;
 using Nexus.Developer.Core.Common.Identifiers;
 
-namespace Nexus.Developer.Core.Subtask;
+namespace Nexus.Developer.Core.Subtasks;
 
 public interface ISubtaskRepository
     : IRepository<Subtask, SubtaskId>

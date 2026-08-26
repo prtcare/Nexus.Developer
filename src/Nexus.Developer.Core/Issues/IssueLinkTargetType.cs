@@ -1,4 +1,4 @@
-namespace Nexus.Developer.Core.Issue;
+namespace Nexus.Developer.Core.Issues;
 
 // The universal-attachment surface: Workspace/Project/Subproject are foreign
 // (Product Core) references; Feature/Milestone/Task/Subtask are Developer's own;

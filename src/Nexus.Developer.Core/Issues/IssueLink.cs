@@ -1,6 +1,6 @@
 using Nexus.Developer.Core.Common.Identifiers;
 
-namespace Nexus.Developer.Core.Issue;
+namespace Nexus.Developer.Core.Issues;
 
 public sealed class IssueLink
 {

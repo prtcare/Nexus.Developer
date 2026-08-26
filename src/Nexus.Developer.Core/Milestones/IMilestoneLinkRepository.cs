@@ -1,6 +1,6 @@
 using Nexus.Developer.Core.Common.Identifiers;
 
-namespace Nexus.Developer.Core.Milestone;
+namespace Nexus.Developer.Core.Milestones;
 
 public interface IMilestoneLinkRepository
 {

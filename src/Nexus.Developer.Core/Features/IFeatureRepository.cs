@@ -1,7 +1,7 @@
 using Nexus.Developer.Core.Common;
 using Nexus.Developer.Core.Common.Identifiers;
 
-namespace Nexus.Developer.Core.Feature;
+namespace Nexus.Developer.Core.Features;
 
 public interface IFeatureRepository
     : IRepository<Feature, FeatureId>

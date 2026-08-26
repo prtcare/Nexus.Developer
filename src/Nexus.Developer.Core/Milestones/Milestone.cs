@@ -1,7 +1,7 @@
 using Nexus.Developer.Core.Common;
 using Nexus.Developer.Core.Common.Identifiers;
 
-namespace Nexus.Developer.Core.Milestone;
+namespace Nexus.Developer.Core.Milestones;
 
 // A grouping/delivery object, not a hierarchy level: it links to any set of
 // Feature/Task/Subtask rows via MilestoneLink (many-to-many) and is never their

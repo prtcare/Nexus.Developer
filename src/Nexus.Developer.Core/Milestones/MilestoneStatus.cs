@@ -1,4 +1,4 @@
-namespace Nexus.Developer.Core.Milestone;
+namespace Nexus.Developer.Core.Milestones;
 
 public enum MilestoneStatus
 {

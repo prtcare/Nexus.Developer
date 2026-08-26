@@ -1,5 +1,5 @@
 using Nexus.Developer.Core.Common.Identifiers;
-using Nexus.Developer.Core.ObjectChatLink;
+using Nexus.Developer.Core.ObjectChatLinks;
 using Xunit;
 
 namespace Nexus.Developer.Core.Tests;

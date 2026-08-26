@@ -1,7 +1,7 @@
 using Nexus.Developer.Core.Common;
 using Nexus.Developer.Core.Common.Identifiers;
 
-namespace Nexus.Developer.Core.Milestone;
+namespace Nexus.Developer.Core.Milestones;
 
 public interface IMilestoneRepository
     : IRepository<Milestone, MilestoneId>

@@ -1,4 +1,4 @@
-namespace Nexus.Developer.Core.Issue;
+namespace Nexus.Developer.Core.Issues;
 
 public enum IssueStatus
 {

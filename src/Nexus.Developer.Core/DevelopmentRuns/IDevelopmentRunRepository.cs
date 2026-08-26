@@ -1,7 +1,7 @@
 using Nexus.Developer.Core.Common;
 using Nexus.Developer.Core.Common.Identifiers;
 
-namespace Nexus.Developer.Core.DevelopmentRun;
+namespace Nexus.Developer.Core.DevelopmentRuns;
 
 public interface IDevelopmentRunRepository
     : IRepository<DevelopmentRun, DevelopmentRunId>

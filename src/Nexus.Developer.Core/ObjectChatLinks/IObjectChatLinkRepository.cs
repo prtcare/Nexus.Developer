@@ -1,4 +1,4 @@
-namespace Nexus.Developer.Core.ObjectChatLink;
+namespace Nexus.Developer.Core.ObjectChatLinks;
 
 public interface IObjectChatLinkRepository
 {

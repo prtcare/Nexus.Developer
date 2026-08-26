@@ -1,16 +1,16 @@
 using Nexus.Developer.Core.Common;
 using Nexus.Developer.Core.Common.Identifiers;
 
-namespace Nexus.Developer.Core.Feature;
+namespace Nexus.Developer.Core.Issues;
 
-// Top of Nexus.Developer's own owned hierarchy: Subproject (foreign, Product Core)
-// > Feature > Task > Subtask. Milestone links to this via MilestoneLink without ever
-// being its parent (ADR-005 / F-07-10).
-public sealed class Feature : AggregateRoot<FeatureId>
+// Universally attachable: an Issue is never permanently positioned inside the
+// Workspace > Project > Subproject > Feature > Task > Subtask hierarchy. All of its
+// positioning comes from IssueLink rows, which is why this aggregate carries no
+// parent id of its own.
+public sealed class Issue : AggregateRoot<IssueId>
 {
-    public Feature(
-        FeatureId id,
-        SubprojectId subprojectId,
+    public Issue(
+        IssueId id,
         string title,
         string description,
         Guid createdByUserId,
@@ -19,26 +19,23 @@ public sealed class Feature : AggregateRoot<FeatureId>
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
 
-        SubprojectId = subprojectId;
         Title = title.Trim();
         Description = description?.Trim() ?? string.Empty;
-        Status = DevelopmentItemStatus.New;
+        Status = IssueStatus.Open;
         CreatedByUserId = createdByUserId;
         CreatedAt = createdAt;
     }
 
-    private Feature(
-        FeatureId id,
-        SubprojectId subprojectId,
+    private Issue(
+        IssueId id,
         string title,
         string description,
-        DevelopmentItemStatus status,
+        IssueStatus status,
         Guid createdByUserId,
         DateTimeOffset createdAt,
         string reference)
         : base(id)
     {
-        SubprojectId = subprojectId;
         Title = title;
         Description = description;
         Status = status;
@@ -47,13 +44,11 @@ public sealed class Feature : AggregateRoot<FeatureId>
         Reference = reference;
     }
 
-    public SubprojectId SubprojectId { get; }
-
     public string Title { get; private set; } = string.Empty;
 
     public string Description { get; private set; } = string.Empty;
 
-    public DevelopmentItemStatus Status { get; private set; }
+    public IssueStatus Status { get; private set; }
 
     public Guid CreatedByUserId { get; }
 
@@ -61,18 +56,15 @@ public sealed class Feature : AggregateRoot<FeatureId>
 
     public string Reference { get; private set; } = string.Empty;
 
-    // Rehydration path: only a repository restoring a persisted row knows the
-    // reference the store already allocated - the constructor above never does.
-    public static Feature Restore(
-        FeatureId id,
-        SubprojectId subprojectId,
+    public static Issue Restore(
+        IssueId id,
         string title,
         string description,
-        DevelopmentItemStatus status,
+        IssueStatus status,
         Guid createdByUserId,
         DateTimeOffset createdAt,
         string reference)
-        => new(id, subprojectId, title, description, status, createdByUserId, createdAt, reference);
+        => new(id, title, description, status, createdByUserId, createdAt, reference);
 
     public void Rename(string title)
     {
@@ -86,7 +78,7 @@ public sealed class Feature : AggregateRoot<FeatureId>
         Description = description?.Trim() ?? string.Empty;
     }
 
-    public void ChangeStatus(DevelopmentItemStatus status)
+    public void ChangeStatus(IssueStatus status)
     {
         Status = status;
     }

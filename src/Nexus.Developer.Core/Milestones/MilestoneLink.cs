@@ -1,6 +1,6 @@
 using Nexus.Developer.Core.Common.Identifiers;
 
-namespace Nexus.Developer.Core.Milestone;
+namespace Nexus.Developer.Core.Milestones;
 
 // The many-to-many join between a Milestone and a Feature/Task/Subtask row. A real
 // row, not a UI-only association (M-07-10.1 acceptance). TargetId is a plain Guid

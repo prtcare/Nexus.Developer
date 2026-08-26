@@ -1,13 +1,16 @@
 using Nexus.Developer.Core.Common;
 using Nexus.Developer.Core.Common.Identifiers;
 
-namespace Nexus.Developer.Core.Subtask;
+namespace Nexus.Developer.Core.Features;
 
-public sealed class Subtask : AggregateRoot<SubtaskId>
+// Top of Nexus.Developer's own owned hierarchy: Subproject (foreign, Product Core)
+// > Feature > Task > Subtask. Milestone links to this via MilestoneLink without ever
+// being its parent (ADR-005 / F-07-10).
+public sealed class Feature : AggregateRoot<FeatureId>
 {
-    public Subtask(
-        SubtaskId id,
-        TaskId taskId,
+    public Feature(
+        FeatureId id,
+        SubprojectId subprojectId,
         string title,
         string description,
         Guid createdByUserId,
@@ -16,7 +19,7 @@ public sealed class Subtask : AggregateRoot<SubtaskId>
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
 
-        TaskId = taskId;
+        SubprojectId = subprojectId;
         Title = title.Trim();
         Description = description?.Trim() ?? string.Empty;
         Status = DevelopmentItemStatus.New;
@@ -24,9 +27,9 @@ public sealed class Subtask : AggregateRoot<SubtaskId>
         CreatedAt = createdAt;
     }
 
-    private Subtask(
-        SubtaskId id,
-        TaskId taskId,
+    private Feature(
+        FeatureId id,
+        SubprojectId subprojectId,
         string title,
         string description,
         DevelopmentItemStatus status,
@@ -35,7 +38,7 @@ public sealed class Subtask : AggregateRoot<SubtaskId>
         string reference)
         : base(id)
     {
-        TaskId = taskId;
+        SubprojectId = subprojectId;
         Title = title;
         Description = description;
         Status = status;
@@ -44,7 +47,7 @@ public sealed class Subtask : AggregateRoot<SubtaskId>
         Reference = reference;
     }
 
-    public TaskId TaskId { get; }
+    public SubprojectId SubprojectId { get; }
 
     public string Title { get; private set; } = string.Empty;
 
@@ -58,16 +61,18 @@ public sealed class Subtask : AggregateRoot<SubtaskId>
 
     public string Reference { get; private set; } = string.Empty;
 
-    public static Subtask Restore(
-        SubtaskId id,
-        TaskId taskId,
+    // Rehydration path: only a repository restoring a persisted row knows the
+    // reference the store already allocated - the constructor above never does.
+    public static Feature Restore(
+        FeatureId id,
+        SubprojectId subprojectId,
         string title,
         string description,
         DevelopmentItemStatus status,
         Guid createdByUserId,
         DateTimeOffset createdAt,
         string reference)
-        => new(id, taskId, title, description, status, createdByUserId, createdAt, reference);
+        => new(id, subprojectId, title, description, status, createdByUserId, createdAt, reference);
 
     public void Rename(string title)
     {

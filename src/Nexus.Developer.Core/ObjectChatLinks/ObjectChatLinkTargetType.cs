@@ -1,4 +1,4 @@
-namespace Nexus.Developer.Core.ObjectChatLink;
+namespace Nexus.Developer.Core.ObjectChatLinks;
 
 // A Chat produces development objects, not the other way round -- so the target
 // side only spans the objects a discussion can turn into (M-07-10.4 acceptance:
