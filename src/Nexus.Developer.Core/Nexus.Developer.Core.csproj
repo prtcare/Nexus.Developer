@@ -7,4 +7,17 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!--
+      Contracts-only reference to Layer 06 Product Core (CHG-20260827-002), the same pattern
+      already established for DEVELOPER -> EXPERIENCE (CHANGE_REPORT_v2.1 #10). This is NOT a
+      product domain assembly reference - Nexus.ProductCore.Contracts holds only interfaces
+      (IScopeKindRegistry) and small value types (ScopeKind, WellKnownScopeKinds), no
+      Workspace/Project/Subproject domain classes. Restored from the local file feed
+      (C:\Personal\LocalNuGet) since GitHub Packages is unreachable from this device - see
+      nuget.config's "local" source.
+    -->
+    <PackageReference Include="Nexus.ProductCore.Contracts" Version="0.1.0-*" />
+  </ItemGroup>
+
 </Project>
