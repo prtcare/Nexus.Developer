@@ -1,3 +1,4 @@
+using Nexus.Developer.Api.Endpoints.ChatCore;
 using Nexus.Developer.Api.Endpoints.Features;
 using Nexus.Developer.Api.Endpoints.Issues;
 using Nexus.Developer.Api.Endpoints.Milestones;
@@ -38,6 +39,7 @@ app.MapSubtaskEndpoints();
 app.MapMilestoneEndpoints();
 app.MapIssueEndpoints();
 app.MapObjectChatLinkEndpoints();
+app.MapConvertConversationEndpoints();
 
 app.Run();
 

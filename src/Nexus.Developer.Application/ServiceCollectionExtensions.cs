@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Nexus.Developer.Application.ChatCore.Commands.ConvertConversationToFeature;
 using Nexus.Developer.Application.Features.Commands.CreateFeature;
 using Nexus.Developer.Application.Features.Queries.GetFeature;
 using Nexus.Developer.Application.Features.Queries.ListFeaturesBySubproject;
@@ -53,6 +54,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<CreateObjectChatLinkHandler>();
         services.AddScoped<ListObjectChatLinksByConversationHandler>();
         services.AddScoped<ListObjectChatLinksByTargetHandler>();
+
+        services.AddScoped<ConvertConversationToFeatureHandler>();
 
         return services;
     }
