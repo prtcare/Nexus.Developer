@@ -1,5 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Nexus.Developer.Application.ChatCore.Commands.ConvertConversationToFeature;
+using Nexus.Developer.Application.ChatCore.Commands.ConvertConversationToIssue;
+using Nexus.Developer.Application.ChatCore.Commands.ConvertConversationToMilestone;
+using Nexus.Developer.Application.ChatCore.Commands.ConvertConversationToSubtask;
+using Nexus.Developer.Application.ChatCore.Commands.ConvertConversationToTask;
 using Nexus.Developer.Application.Features.Commands.CreateFeature;
 using Nexus.Developer.Application.Features.Queries.GetFeature;
 using Nexus.Developer.Application.Features.Queries.ListFeaturesBySubproject;
@@ -56,6 +60,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ListObjectChatLinksByTargetHandler>();
 
         services.AddScoped<ConvertConversationToFeatureHandler>();
+        services.AddScoped<ConvertConversationToTaskHandler>();
+        services.AddScoped<ConvertConversationToSubtaskHandler>();
+        services.AddScoped<ConvertConversationToMilestoneHandler>();
+        services.AddScoped<ConvertConversationToIssueHandler>();
 
         return services;
     }
