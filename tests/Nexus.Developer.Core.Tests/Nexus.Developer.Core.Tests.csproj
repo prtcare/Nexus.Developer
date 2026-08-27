@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Nexus.Developer.Core\Nexus.Developer.Core.csproj" />
+    <ProjectReference Include="..\..\src\Nexus.Developer.Application\Nexus.Developer.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

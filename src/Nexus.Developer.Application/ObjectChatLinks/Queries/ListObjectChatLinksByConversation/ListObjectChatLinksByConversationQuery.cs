@@ -1,0 +1,3 @@
+namespace Nexus.Developer.Application.ObjectChatLinks.Queries.ListObjectChatLinksByConversation;
+
+public sealed record ListObjectChatLinksByConversationQuery(Guid ConversationId);

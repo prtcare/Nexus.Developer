@@ -9,6 +9,9 @@ using Nexus.Developer.Application.Milestones.Commands.CreateMilestone;
 using Nexus.Developer.Application.Milestones.Commands.LinkMilestone;
 using Nexus.Developer.Application.Milestones.Queries.GetMilestone;
 using Nexus.Developer.Application.Milestones.Queries.ListMilestonesBySubproject;
+using Nexus.Developer.Application.ObjectChatLinks.Commands.CreateObjectChatLink;
+using Nexus.Developer.Application.ObjectChatLinks.Queries.ListObjectChatLinksByConversation;
+using Nexus.Developer.Application.ObjectChatLinks.Queries.ListObjectChatLinksByTarget;
 using Nexus.Developer.Application.Subtasks.Commands.CreateSubtask;
 using Nexus.Developer.Application.Subtasks.Queries.GetSubtask;
 using Nexus.Developer.Application.Subtasks.Queries.ListSubtasksByTask;
@@ -46,6 +49,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<CreateIssueHandler>();
         services.AddScoped<GetIssueHandler>();
         services.AddScoped<LinkIssueHandler>();
+
+        services.AddScoped<CreateObjectChatLinkHandler>();
+        services.AddScoped<ListObjectChatLinksByConversationHandler>();
+        services.AddScoped<ListObjectChatLinksByTargetHandler>();
 
         return services;
     }

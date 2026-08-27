@@ -1,6 +1,7 @@
 using Nexus.Developer.Api.Endpoints.Features;
 using Nexus.Developer.Api.Endpoints.Issues;
 using Nexus.Developer.Api.Endpoints.Milestones;
+using Nexus.Developer.Api.Endpoints.ObjectChatLinks;
 using Nexus.Developer.Api.Endpoints.Subtasks;
 using Nexus.Developer.Api.Endpoints.Tasks;
 using Nexus.Developer.Application;
@@ -36,6 +37,7 @@ app.MapTaskEndpoints();
 app.MapSubtaskEndpoints();
 app.MapMilestoneEndpoints();
 app.MapIssueEndpoints();
+app.MapObjectChatLinkEndpoints();
 
 app.Run();
 
