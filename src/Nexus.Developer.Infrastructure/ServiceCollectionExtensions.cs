@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Nexus.Developer.Core.ChatCore;
 using Nexus.Developer.Core.DevelopmentRuns;
 using Nexus.Developer.Core.Features;
 using Nexus.Developer.Core.Issues;
@@ -8,6 +9,7 @@ using Nexus.Developer.Core.Milestones;
 using Nexus.Developer.Core.ObjectChatLinks;
 using Nexus.Developer.Core.Subtasks;
 using Nexus.Developer.Core.Tasks;
+using Nexus.Developer.Infrastructure.ChatCore;
 using Nexus.Developer.Infrastructure.Sql;
 using Nexus.Developer.Infrastructure.Sql.Repositories;
 
@@ -39,6 +41,15 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IIssueLinkRepository, SqlIssueLinkRepository>();
         services.AddScoped<IObjectChatLinkRepository, SqlObjectChatLinkRepository>();
         services.AddScoped<IDevelopmentRunRepository, SqlDevelopmentRunRepository>();
+
+        var chatCoreBaseUrl = configuration.GetSection("ChatCoreApi")["BaseUrl"]
+            ?? throw new InvalidOperationException(
+                "ChatCoreApi:BaseUrl is not configured.");
+
+        services.AddHttpClient<IChatCoreClient, HttpChatCoreClient>(httpClient =>
+        {
+            httpClient.BaseAddress = new Uri(chatCoreBaseUrl);
+        });
 
         return services;
     }
