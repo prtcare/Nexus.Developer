@@ -40,6 +40,10 @@ app.MapMilestoneEndpoints();
 app.MapIssueEndpoints();
 app.MapObjectChatLinkEndpoints();
 app.MapConvertConversationEndpoints();
+app.MapConvertConversationToTaskEndpoints();
+app.MapConvertConversationToSubtaskEndpoints();
+app.MapConvertConversationToMilestoneEndpoints();
+app.MapConvertConversationToIssueEndpoints();
 
 app.Run();
 
