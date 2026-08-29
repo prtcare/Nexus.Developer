@@ -7,9 +7,11 @@ using Nexus.Developer.Core.Features;
 using Nexus.Developer.Core.Issues;
 using Nexus.Developer.Core.Milestones;
 using Nexus.Developer.Core.ObjectChatLinks;
+using Nexus.Developer.Core.Scope;
 using Nexus.Developer.Core.Subtasks;
 using Nexus.Developer.Core.Tasks;
 using Nexus.Developer.Infrastructure.ChatCore;
+using Nexus.Developer.Infrastructure.Scope;
 using Nexus.Developer.Infrastructure.Sql;
 using Nexus.Developer.Infrastructure.Sql.Repositories;
 
@@ -47,6 +49,14 @@ public static class ServiceCollectionExtensions
                 "ChatCoreApi:BaseUrl is not configured.");
 
         services.AddHttpClient<IChatCoreClient, HttpChatCoreClient>(httpClient =>
+        {
+            httpClient.BaseAddress = new Uri(chatCoreBaseUrl);
+        });
+
+        // The Subproject endpoint is hosted on the same Nexus.Experience Chat Api
+        // process as Chat Core's conversations (Nexus.Products.Chat.Api maps both),
+        // so it reuses the same BaseUrl -- no second config key.
+        services.AddHttpClient<IScopeClient, HttpScopeClient>(httpClient =>
         {
             httpClient.BaseAddress = new Uri(chatCoreBaseUrl);
         });

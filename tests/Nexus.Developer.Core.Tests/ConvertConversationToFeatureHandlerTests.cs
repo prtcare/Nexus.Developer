@@ -8,6 +8,7 @@ using Nexus.Developer.Core.Features;
 using Nexus.Developer.Core.Issues;
 using Nexus.Developer.Core.Milestones;
 using Nexus.Developer.Core.ObjectChatLinks;
+using Nexus.Developer.Core.Scope;
 using Nexus.Developer.Core.Subtasks;
 using DeveloperTask = Nexus.Developer.Core.Tasks.Task;
 using ITaskRepository = Nexus.Developer.Core.Tasks.ITaskRepository;
@@ -121,7 +122,12 @@ public class ConvertConversationToFeatureHandlerTests
         IFeatureRepository featureRepository,
         IObjectChatLinkRepository objectChatLinkRepository)
     {
-        var createFeatureHandler = new CreateFeatureHandler(featureRepository);
+        // CreateFeatureHandler now validates the Subproject exists; that path is
+        // covered by CreateFeatureHandlerTests, so this convert-flow fake always
+        // reports the subproject present.
+        var createFeatureHandler = new CreateFeatureHandler(
+            new AlwaysPresentScopeClient(),
+            featureRepository);
         var createObjectChatLinkHandler = new CreateObjectChatLinkHandler(
             featureRepository,
             new NullTaskRepository(),
@@ -148,6 +154,19 @@ public class ConvertConversationToFeatureHandlerTests
             CancellationToken cancellationToken = default)
             => Task.FromResult(
                 _conversations.TryGetValue(conversationId, out var conversation) ? conversation : null);
+    }
+
+    private sealed class AlwaysPresentScopeClient : IScopeClient
+    {
+        public Task<ScopeSubproject?> GetSubprojectAsync(
+            SubprojectId subprojectId,
+            CancellationToken cancellationToken = default)
+            => Task.FromResult<ScopeSubproject?>(
+                new ScopeSubproject(
+                    subprojectId.Value,
+                    Guid.NewGuid(),
+                    "Existing Subproject",
+                    "SP-0000"));
     }
 
     private sealed class RecordingFeatureRepository : IFeatureRepository

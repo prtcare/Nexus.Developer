@@ -8,6 +8,7 @@ using Nexus.Developer.Core.Features;
 using Nexus.Developer.Core.Issues;
 using Nexus.Developer.Core.Milestones;
 using Nexus.Developer.Core.ObjectChatLinks;
+using Nexus.Developer.Core.Scope;
 using Nexus.Developer.Core.Subtasks;
 using DeveloperTask = Nexus.Developer.Core.Tasks.Task;
 using ITaskRepository = Nexus.Developer.Core.Tasks.ITaskRepository;
@@ -126,7 +127,12 @@ public class ConvertConversationToMilestoneHandlerTests
         IMilestoneRepository milestoneRepository,
         IObjectChatLinkRepository objectChatLinkRepository)
     {
-        var createMilestoneHandler = new CreateMilestoneHandler(milestoneRepository);
+        // CreateMilestoneHandler now validates the Subproject exists; that path is
+        // covered by CreateMilestoneHandlerTests, so this convert-flow fake always
+        // reports the subproject present.
+        var createMilestoneHandler = new CreateMilestoneHandler(
+            new AlwaysPresentScopeClient(),
+            milestoneRepository);
         var createObjectChatLinkHandler = new CreateObjectChatLinkHandler(
             new NullFeatureRepository(),
             new NullTaskRepository(),
@@ -153,6 +159,19 @@ public class ConvertConversationToMilestoneHandlerTests
             CancellationToken cancellationToken = default)
             => Task.FromResult(
                 _conversations.TryGetValue(conversationId, out var conversation) ? conversation : null);
+    }
+
+    private sealed class AlwaysPresentScopeClient : IScopeClient
+    {
+        public Task<ScopeSubproject?> GetSubprojectAsync(
+            SubprojectId subprojectId,
+            CancellationToken cancellationToken = default)
+            => Task.FromResult<ScopeSubproject?>(
+                new ScopeSubproject(
+                    subprojectId.Value,
+                    Guid.NewGuid(),
+                    "Existing Subproject",
+                    "SP-0000"));
     }
 
     private sealed class RecordingMilestoneRepository : IMilestoneRepository
