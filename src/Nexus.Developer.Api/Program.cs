@@ -24,7 +24,29 @@ builder.Services.AddScopeKindRegistry();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
+// CORS for the browser client (Nexus.Experience Vite dev server on :5173).
+// Mirrors Nexus.Products.Chat.Api's Nexus:Cors:AllowedOrigins pattern so the
+// convert-from-chat flow's cross-origin POSTs pass preflight in development.
+var allowedOrigins =
+    builder.Configuration
+        .GetSection("Nexus:Cors:AllowedOrigins")
+        .Get<string[]>()
+    ?? ["http://localhost:5173"];
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("NexusWebDevelopment", policy =>
+    {
+        policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+
+app.UseCors("NexusWebDevelopment");
 
 if (app.Environment.IsDevelopment())
 {
