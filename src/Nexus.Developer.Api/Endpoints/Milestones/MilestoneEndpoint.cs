@@ -6,6 +6,7 @@ using Nexus.Developer.Application.Milestones.Commands.CreateMilestone;
 using Nexus.Developer.Application.Milestones.Commands.LinkMilestone;
 using Nexus.Developer.Application.Milestones.Queries.GetMilestone;
 using Nexus.Developer.Application.Milestones.Queries.ListMilestonesBySubproject;
+using Nexus.Developer.Application.Scope;
 using Nexus.Developer.Core.Common.Identifiers;
 using Nexus.Developer.Core.Milestones;
 
@@ -28,20 +29,30 @@ public static class MilestoneEndpoint
                     return Results.BadRequest(new { error = "Name is required." });
                 }
 
-                var result = await handler.HandleAsync(
-                    new CreateMilestoneCommand(
-                        new SubprojectId(request.SubprojectId),
-                        request.Name,
-                        request.Description ?? string.Empty,
-                        request.TargetDate,
-                        request.CreatedByUserId),
-                    cancellationToken);
+                try
+                {
+                    var result = await handler.HandleAsync(
+                        new CreateMilestoneCommand(
+                            new SubprojectId(request.SubprojectId),
+                            request.Name,
+                            request.Description ?? string.Empty,
+                            request.TargetDate,
+                            request.CreatedByUserId),
+                        cancellationToken);
 
-                return Results.Ok(
-                    new CreateMilestoneResponse(
-                        result.MilestoneId.Value,
-                        result.Name,
-                        result.Reference));
+                    return Results.Ok(
+                        new CreateMilestoneResponse(
+                            result.MilestoneId.Value,
+                            result.Name,
+                            result.Reference));
+                }
+                catch (SubprojectNotFoundException ex)
+                {
+                    // Same shape as FeatureEndpoint: the SubprojectId is invalid
+                    // input on this create endpoint (a foreign reference, not the
+                    // resource being created), so 400 -- never an unhandled 500.
+                    return Results.BadRequest(new { error = ex.Message });
+                }
             });
 
         app.MapGet(

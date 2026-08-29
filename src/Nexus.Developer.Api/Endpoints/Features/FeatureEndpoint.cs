@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Routing;
 using Nexus.Developer.Application.Features.Commands.CreateFeature;
 using Nexus.Developer.Application.Features.Queries.GetFeature;
 using Nexus.Developer.Application.Features.Queries.ListFeaturesBySubproject;
+using Nexus.Developer.Application.Scope;
 using Nexus.Developer.Core.Common.Identifiers;
 
 namespace Nexus.Developer.Api.Endpoints.Features;
@@ -26,19 +27,30 @@ public static class FeatureEndpoint
                     return Results.BadRequest(new { error = "Title is required." });
                 }
 
-                var result = await handler.HandleAsync(
-                    new CreateFeatureCommand(
-                        new SubprojectId(request.SubprojectId),
-                        request.Title,
-                        request.Description ?? string.Empty,
-                        request.CreatedByUserId),
-                    cancellationToken);
+                try
+                {
+                    var result = await handler.HandleAsync(
+                        new CreateFeatureCommand(
+                            new SubprojectId(request.SubprojectId),
+                            request.Title,
+                            request.Description ?? string.Empty,
+                            request.CreatedByUserId),
+                        cancellationToken);
 
-                return Results.Ok(
-                    new CreateFeatureResponse(
-                        result.FeatureId.Value,
-                        result.Title,
-                        result.Reference));
+                    return Results.Ok(
+                        new CreateFeatureResponse(
+                            result.FeatureId.Value,
+                            result.Title,
+                            result.Reference));
+                }
+                catch (SubprojectNotFoundException ex)
+                {
+                    // The SubprojectId is invalid input on this create endpoint
+                    // (a foreign reference, not the resource being created), so
+                    // 400 -- matching the Title-required check above, never an
+                    // unhandled 500.
+                    return Results.BadRequest(new { error = ex.Message });
+                }
             });
 
         app.MapGet(
