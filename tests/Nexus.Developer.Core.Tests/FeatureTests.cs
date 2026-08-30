@@ -18,7 +18,7 @@ public class FeatureTests
             Guid.NewGuid(),
             DateTimeOffset.UtcNow);
 
-        Assert.Equal("Developer Chat-", feature.Title);
+        Assert.Equal("Developer Chat", feature.Title);
         Assert.Equal("discussion to structured object", feature.Description);
         Assert.Equal(DevelopmentItemStatus.New, feature.Status);
         Assert.Equal(string.Empty, feature.Reference);
