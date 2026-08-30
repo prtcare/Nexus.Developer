@@ -35,12 +35,13 @@ jobs:
         with:
           global-json-file: global.json
 
-      # nuget.config pins the feed list (<clear/> then nuget.org + github-prtcare
-      # + local) and reads %GITHUB_PACKAGES_USERNAME% / %GITHUB_PACKAGES_TOKEN%
-      # from the job env above. The `local` source is a dev-machine folder path
-      # that doesn't exist on the runner; NuGet skips a missing folder source, so
-      # it's harmless here. The private Nexus.ProductCore.Contracts package can
-      # only be resolved from github-prtcare, hence the credentials.
+      # nuget.config pins the feed list (<clear/> then nuget.org + github-prtcare)
+      # and reads %GITHUB_PACKAGES_USERNAME% / %GITHUB_PACKAGES_TOKEN% from the
+      # job env above. The dev-machine `local` feed was dropped from nuget.config
+      # (a machine-local folder path is treated as relative on the Linux runner
+      # and fails restore with NU1301; mirrors Nexus.Intelligence/Nexus.Experience).
+      # The private Nexus.ProductCore.Contracts package resolves from github-prtcare,
+      # hence the credentials.
       - name: Restore
         run: dotnet restore Nexus.Developer.slnx
 
