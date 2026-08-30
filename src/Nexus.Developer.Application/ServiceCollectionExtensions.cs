@@ -4,6 +4,11 @@ using Nexus.Developer.Application.ChatCore.Commands.ConvertConversationToIssue;
 using Nexus.Developer.Application.ChatCore.Commands.ConvertConversationToMilestone;
 using Nexus.Developer.Application.ChatCore.Commands.ConvertConversationToSubtask;
 using Nexus.Developer.Application.ChatCore.Commands.ConvertConversationToTask;
+using Nexus.Developer.Application.Dependencies.Commands.CreateWorkItemDependency;
+using Nexus.Developer.Application.Dependencies.Queries.GetBlockingChain;
+using Nexus.Developer.Application.Dependencies.Queries.ListDependenciesByNode;
+using Nexus.Developer.Application.DevelopmentRuns.Commands.CreateDevelopmentRun;
+using Nexus.Developer.Application.DevelopmentRuns.Queries.GetDevelopmentRun;
 using Nexus.Developer.Application.Features.Commands.CreateFeature;
 using Nexus.Developer.Application.Features.Queries.GetFeature;
 using Nexus.Developer.Application.Features.Queries.ListFeaturesBySubproject;
@@ -58,6 +63,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<CreateObjectChatLinkHandler>();
         services.AddScoped<ListObjectChatLinksByConversationHandler>();
         services.AddScoped<ListObjectChatLinksByTargetHandler>();
+
+        services.AddScoped<CreateDevelopmentRunHandler>();
+        services.AddScoped<GetDevelopmentRunHandler>();
+
+        services.AddScoped<CreateWorkItemDependencyHandler>();
+        services.AddScoped<GetBlockingChainHandler>();
+        services.AddScoped<ListDependenciesByNodeHandler>();
 
         services.AddScoped<ConvertConversationToFeatureHandler>();
         services.AddScoped<ConvertConversationToTaskHandler>();

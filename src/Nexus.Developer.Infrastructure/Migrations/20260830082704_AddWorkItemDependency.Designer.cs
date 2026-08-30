@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Nexus.Developer.Infrastructure.Sql;
 
@@ -11,9 +12,11 @@ using Nexus.Developer.Infrastructure.Sql;
 namespace Nexus.Developer.Infrastructure.Migrations
 {
     [DbContext(typeof(NexusDeveloperDbContext))]
-    partial class NexusDeveloperDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260830082704_AddWorkItemDependency")]
+    partial class AddWorkItemDependency
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
