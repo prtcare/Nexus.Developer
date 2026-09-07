@@ -1,6 +1,7 @@
 using Nexus.Developer.Api.Endpoints;
 using Nexus.Developer.Api.Endpoints.ChatCore;
 using Nexus.Developer.Api.Endpoints.Dependencies;
+using Nexus.Developer.Api.Endpoints.DevelopmentControl;
 using Nexus.Developer.Api.Endpoints.DevelopmentRuns;
 using Nexus.Developer.Api.Endpoints.Features;
 using Nexus.Developer.Api.Endpoints.Issues;
@@ -17,6 +18,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDeveloperInfrastructure(builder.Configuration);
 builder.Services.AddDeveloperApplication();
+
+// SP1-M05: bind the governed Development Control store (Excel adapter -> guarded store ->
+// lock factory/coordinator) through the real composition root. The named writer lock the
+// guarded store acquires is derived from DevelopmentControl:WorkbookPath, so any process
+// configuring the same canonical path contends on the same kernel object.
+builder.Services.AddDevelopmentControl(builder.Configuration, builder.Environment.ContentRootPath);
 
 // CHG-20260827-002 (M-06-1.2 Slice 3): a process-local scope-kind registry. Developer
 // registers its own hierarchy below Layer 06's shared Subproject trunk kind. This does not
@@ -66,6 +73,7 @@ app.MapIssueEndpoints();
 app.MapObjectChatLinkEndpoints();
 app.MapDevelopmentRunEndpoints();
 app.MapDependencyEndpoints();
+app.MapDevelopmentControlEndpoints();
 app.MapConvertConversationEndpoints();
 app.MapConvertConversationToTaskEndpoints();
 app.MapConvertConversationToSubtaskEndpoints();

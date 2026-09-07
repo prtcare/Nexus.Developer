@@ -7,4 +7,9 @@ public sealed record GetDevelopmentRunResponse(
     int Status,
     Guid CreatedByUserId,
     DateTimeOffset CreatedAt,
-    string Reference);
+    string Reference,
+    string? WorkerId,
+    string? WorkerType,
+    DateTimeOffset? StartedAt,
+    DateTimeOffset? CompletedAt,
+    string? ResultSummary);
