@@ -30,6 +30,7 @@ public sealed class GetFeatureHandler
             feature.Status,
             feature.CreatedByUserId,
             feature.CreatedAt,
-            feature.Reference);
+            feature.Reference,
+            feature.ParentFeatureId);
     }
 }

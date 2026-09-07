@@ -10,6 +10,7 @@ using Nexus.Developer.Application.Dependencies.Queries.ListDependenciesByNode;
 using Nexus.Developer.Application.DevelopmentRuns.Commands.CreateDevelopmentRun;
 using Nexus.Developer.Application.DevelopmentRuns.Queries.GetDevelopmentRun;
 using Nexus.Developer.Application.Features.Commands.CreateFeature;
+using Nexus.Developer.Application.Features.Commands.SetFeatureParent;
 using Nexus.Developer.Application.Features.Queries.GetFeature;
 using Nexus.Developer.Application.Features.Queries.ListFeaturesBySubproject;
 using Nexus.Developer.Application.Issues.Commands.CreateIssue;
@@ -40,6 +41,7 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services)
     {
         services.AddScoped<CreateFeatureHandler>();
+        services.AddScoped<SetFeatureParentHandler>();
         services.AddScoped<GetFeatureHandler>();
         services.AddScoped<ListFeaturesBySubprojectHandler>();
 

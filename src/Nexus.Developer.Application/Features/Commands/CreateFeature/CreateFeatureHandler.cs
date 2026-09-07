@@ -35,13 +35,36 @@ public sealed class CreateFeatureHandler
             throw new SubprojectNotFoundException(command.SubprojectId);
         }
 
+        // A subfeature may only be created under an existing parent Feature in the
+        // same Subproject (D04). The parent is Developer's own row, so it is
+        // resolved through IFeatureRepository (unlike the foreign Subproject above).
+        if (command.ParentFeatureId is not null)
+        {
+            var parent = await _repository.GetAsync(
+                command.ParentFeatureId.Value,
+                cancellationToken);
+
+            if (parent is null)
+            {
+                throw new FeatureParentNotFoundException(command.ParentFeatureId.Value);
+            }
+
+            if (parent.SubprojectId != command.SubprojectId)
+            {
+                throw new ArgumentException(
+                    "A child feature must belong to the same subproject as its parent.",
+                    nameof(command.ParentFeatureId));
+            }
+        }
+
         var feature = new Feature(
             FeatureId.New(),
             command.SubprojectId,
             command.Title,
             command.Description,
             command.CreatedByUserId,
-            DateTimeOffset.UtcNow);
+            DateTimeOffset.UtcNow,
+            command.ParentFeatureId);
 
         await _repository.AddAsync(feature, cancellationToken);
 

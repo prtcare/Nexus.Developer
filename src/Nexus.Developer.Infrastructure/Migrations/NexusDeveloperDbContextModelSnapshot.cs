@@ -141,6 +141,9 @@ namespace Nexus.Developer.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("ParentFeatureId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Reference")
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
@@ -166,6 +169,9 @@ namespace Nexus.Developer.Infrastructure.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ParentFeatureId")
+                        .HasDatabaseName("IX_Feature_ParentFeatureId");
 
                     b.HasIndex("Reference")
                         .IsUnique()
@@ -477,6 +483,15 @@ namespace Nexus.Developer.Infrastructure.Migrations
                         .HasDatabaseName("UQ_Task_Ref");
 
                     b.ToTable("Task", "dev");
+                });
+
+            modelBuilder.Entity("Nexus.Developer.Core.Features.Feature", b =>
+                {
+                    b.HasOne("Nexus.Developer.Core.Features.Feature", null)
+                        .WithMany()
+                        .HasForeignKey("ParentFeatureId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_Feature_ParentFeature");
                 });
 
             modelBuilder.Entity("Nexus.Developer.Core.Issues.IssueLink", b =>
