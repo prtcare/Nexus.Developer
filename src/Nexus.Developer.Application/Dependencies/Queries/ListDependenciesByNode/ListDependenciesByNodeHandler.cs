@@ -27,7 +27,8 @@ public sealed class ListDependenciesByNodeHandler
                 dependency.Kind,
                 dependency.RequiredState,
                 dependency.CreatedByUserId,
-                dependency.CreatedAt))
+                dependency.CreatedAt,
+                dependency.Reason))
             .ToList();
 
         return new ListDependenciesByNodeResult(results);

@@ -451,6 +451,20 @@ public sealed class ExcelDevelopmentControlStore : IDevelopmentControlStore, IDe
         return workbook;
     }
 
+    // SP1-M04: throws a controlled InvalidOperationException (caught by the mutation paths and
+    // surfaced as a failed result carrying the documented message) when the workbook declares a
+    // schema version NEWER than this build understands. Absent markers (legacy) and the current
+    // version are both fully supported and proceed unchanged.
+    private static void EnsureSchemaVersionSupported(IXLWorkbook workbook)
+    {
+        var schema = DevelopmentControlWorkbookSchema.Read(workbook);
+        if (schema.Category == DevelopmentControlSchemaCategory.Future)
+        {
+            throw new InvalidOperationException(
+                DevelopmentControlWorkbookSchema.FutureVersionMessage(schema.DeclaredVersion));
+        }
+    }
+
     private static IXLWorksheet Sheet(IXLWorkbook workbook, string name) =>
         workbook.Worksheets.TryGetWorksheet(name, out var sheet)
             ? sheet
@@ -508,10 +522,18 @@ public sealed class ExcelDevelopmentControlStore : IDevelopmentControlStore, IDe
             string? tempPath = null;
             using (var workbook = Open(cancellationToken))
             {
+                // SP1-M04 schema-version gate: a workbook declaring a NEWER schema version than
+                // this build supports is refused up front as a controlled failure (the caller
+                // sees a failed MutationResult carrying the message) -- never an uncaught
+                // exception thrown mid-write after the workbook has started mutating.
+                EnsureSchemaVersionSupported(workbook);
                 result = mutate(workbook);
                 if (result.Success)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
+                    // SP1-M04: the next governed save evolves a legacy workbook by stamping the
+                    // current schema-version marker, so the workbook becomes self-declaring.
+                    DevelopmentControlWorkbookSchema.Stamp(workbook);
                     tempPath = SaveToTemp(workbook);
                 }
             }
@@ -556,6 +578,11 @@ public sealed class ExcelDevelopmentControlStore : IDevelopmentControlStore, IDe
             MutationResult<T>? outcome = null;
             using (var workbook = Open(cancellationToken))
             {
+                // SP1-M04 schema-version gate for the atomic work unit (same controlled refusal
+                // as the single-operation path: a future-version workbook aborts the unit as a
+                // ValidationFailure before any operation runs -- the canonical workbook is never
+                // written, and the caller receives the documented message, not a thrown exception).
+                EnsureSchemaVersionSupported(workbook);
                 _batchWorkbook = workbook;
                 try
                 {
@@ -563,6 +590,7 @@ public sealed class ExcelDevelopmentControlStore : IDevelopmentControlStore, IDe
                     if (outcome.Success)
                     {
                         cancellationToken.ThrowIfCancellationRequested();
+                        DevelopmentControlWorkbookSchema.Stamp(workbook);
                         tempPath = SaveToTemp(workbook);
                     }
                 }
@@ -852,14 +880,24 @@ public sealed class ExcelDevelopmentControlStore : IDevelopmentControlStore, IDe
         var info = versions.For(nodeId.Value);
         var parentText = DevelopmentControlCellCodec.GetNullableString(sheet.Cell(row, map.Required(WorkbookColumns.ParentId)));
         var status = DevelopmentControlCellCodec.ParseStatus(DevelopmentControlCellCodec.GetString(sheet.Cell(row, map.Required(WorkbookColumns.Status))));
+        var nodeType = DevelopmentControlCellCodec.ParseNodeType(DevelopmentControlCellCodec.GetString(sheet.Cell(row, map.Required(WorkbookColumns.NodeType))));
+        var phase = DevelopmentControlCellCodec.GetNullableString(sheet.Cell(row, map.Required(WorkbookColumns.Phase)));
+
+        // SP1-M04 informational phase classification at the read seam: route the workbook's
+        // free-text Phase token through NodePhase so roadmap (P0..P5) and strategic-wave (SP1..SP3)
+        // tokens are classified against the node type. Deliberately NON-blocking -- the result is
+        // discarded here because the raw token is preserved verbatim on the Node and no token,
+        // freeform/legacy/misplaced, may throw or alter the read of the authoritative workbook.
+        _ = NodePhase.Classify(nodeType, phase);
+
         return new Node(
             NodeId: nodeId,
             ParentId: parentText is null ? null : new NodeId(parentText),
-            NodeType: DevelopmentControlCellCodec.ParseNodeType(DevelopmentControlCellCodec.GetString(sheet.Cell(row, map.Required(WorkbookColumns.NodeType)))),
+            NodeType: nodeType,
             SortKey: DevelopmentControlCellCodec.GetString(sheet.Cell(row, map.Required(WorkbookColumns.SortKey))),
             Path: DevelopmentControlCellCodec.GetString(sheet.Cell(row, map.Required(WorkbookColumns.HierarchyPath))),
             Layer: DevelopmentControlCellCodec.GetString(sheet.Cell(row, map.Required(WorkbookColumns.Layer))),
-            Phase: DevelopmentControlCellCodec.GetNullableString(sheet.Cell(row, map.Required(WorkbookColumns.Phase))),
+            Phase: phase,
             Name: DevelopmentControlCellCodec.GetString(sheet.Cell(row, map.Required(WorkbookColumns.Name))),
             Outcome: DevelopmentControlCellCodec.GetNullableString(sheet.Cell(row, map.Required(WorkbookColumns.OutcomePurpose))),
             Dependencies: DevelopmentControlCellCodec.GetList(sheet.Cell(row, map.Required(WorkbookColumns.Dependencies))).Select(d => new NodeId(d)).ToArray(),

@@ -52,5 +52,11 @@ public sealed class WorkItemDependencyConfiguration : IEntityTypeConfiguration<D
 
         builder.Property(dependency => dependency.CreatedAt)
             .IsRequired();
+
+        // Reason (SP1-M04) is optional additive descriptive text for the edge. Nullable
+        // string, no length cap needed beyond a sane ceiling; purely informational.
+        builder.Property(dependency => dependency.Reason)
+            .HasMaxLength(1000)
+            .IsRequired(false);
     }
 }

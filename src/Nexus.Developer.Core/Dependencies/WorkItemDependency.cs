@@ -18,7 +18,8 @@ public sealed class WorkItemDependency
         WorkItemDependencyKind kind,
         WorkItemDependencyRequiredState? requiredState,
         Guid createdByUserId,
-        DateTimeOffset createdAt)
+        DateTimeOffset createdAt,
+        string? reason = null)
     {
         if (!Enum.IsDefined(upstreamType))
         {
@@ -63,6 +64,7 @@ public sealed class WorkItemDependency
         RequiredState = requiredState;
         CreatedByUserId = createdByUserId;
         CreatedAt = createdAt;
+        Reason = string.IsNullOrWhiteSpace(reason) ? null : reason.Trim();
     }
 
     public WorkItemDependencyId Id { get; }
@@ -82,4 +84,9 @@ public sealed class WorkItemDependency
     public Guid CreatedByUserId { get; }
 
     public DateTimeOffset CreatedAt { get; }
+
+    // Optional human/agent-readable rationale for the edge (SP1-M04). Purely additive
+    // descriptive text: it never participates in graph semantics, RequiredState handling,
+    // or the self-dependency guard. Blank/whitespace is normalized to null on construction.
+    public string? Reason { get; }
 }

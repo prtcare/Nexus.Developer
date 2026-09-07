@@ -12,4 +12,5 @@ public sealed record CreateWorkItemDependencyResult(
     WorkItemDependencyKind Kind,
     WorkItemDependencyRequiredState? RequiredState,
     Guid CreatedByUserId,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    string? Reason);
