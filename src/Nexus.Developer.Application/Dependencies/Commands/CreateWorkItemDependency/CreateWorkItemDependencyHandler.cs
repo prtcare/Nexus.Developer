@@ -51,7 +51,8 @@ public sealed class CreateWorkItemDependencyHandler
             command.Kind,
             command.RequiredState,
             command.CreatedByUserId,
-            DateTimeOffset.UtcNow);
+            DateTimeOffset.UtcNow,
+            command.Reason);
 
         await EnsureTargetExistsAsync("upstream", command.UpstreamType, command.UpstreamId, cancellationToken);
         await EnsureTargetExistsAsync("downstream", command.DownstreamType, command.DownstreamId, cancellationToken);
@@ -88,7 +89,8 @@ public sealed class CreateWorkItemDependencyHandler
             dependency.Kind,
             dependency.RequiredState,
             dependency.CreatedByUserId,
-            dependency.CreatedAt);
+            dependency.CreatedAt,
+            dependency.Reason);
     }
 
     // A dependency edge must never dangle: confirm each endpoint resolves through

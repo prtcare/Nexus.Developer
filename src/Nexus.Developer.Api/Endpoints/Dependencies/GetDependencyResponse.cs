@@ -9,4 +9,5 @@ public sealed record GetDependencyResponse(
     string Kind,
     string? RequiredState,
     Guid CreatedByUserId,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    string? Reason);

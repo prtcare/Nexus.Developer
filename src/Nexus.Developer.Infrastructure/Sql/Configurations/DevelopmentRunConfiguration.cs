@@ -38,6 +38,26 @@ public sealed class DevelopmentRunConfiguration : IEntityTypeConfiguration<Domai
         builder.Property(run => run.CreatedAt)
             .IsRequired();
 
+        // Execution-session + result fields (SP1-M03, Lane B1 Phase-1 expansion) --
+        // all nullable so a NotStarted row (the only kind Phase 1 originally created)
+        // persists unchanged; a Started/Completed run round-trips these through SQL.
+        // WorkerId is free text (an agent/session worker id); WorkerType is free text
+        // too -- see DevelopmentRun.WorkerType remarks. ResultSummary is the caller's
+        // own words for what happened; the terminal outcome kind is NOT a column (it
+        // is always derivable from Status -- see DevelopmentRunResult remarks).
+        builder.Property(run => run.WorkerId)
+            .HasMaxLength(200);
+
+        builder.Property(run => run.WorkerType)
+            .HasMaxLength(50);
+
+        builder.Property(run => run.StartedAt);
+
+        builder.Property(run => run.CompletedAt);
+
+        builder.Property(run => run.ResultSummary)
+            .HasColumnType("nvarchar(max)");
+
         // Phase 2 placeholders (WI-07-10.3.1) -- reserved nullable columns, never
         // populated or read by any Phase 1 code path. See class remarks on
         // DevelopmentRun for why these exist now instead of a later migration.

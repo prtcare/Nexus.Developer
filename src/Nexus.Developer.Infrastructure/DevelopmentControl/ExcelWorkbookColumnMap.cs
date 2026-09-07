@@ -98,6 +98,12 @@ internal static class WorkbookColumns
     public const string DueGate = "duegate";
     public const string Verification = "verification";
 
+    // Workbook-level schema-version marker label (SP1-M04). The label is carried on the
+    // Control Center sheet as a labelled metadata pair (see DevelopmentControlWorkbookSchema):
+    // a cell whose normalized text is "schemaversion" with the integer version immediately to
+    // its right. Old/legacy workbooks carry no such label and read as the legacy baseline.
+    public const string SchemaVersion = "schemaversion";
+
     // --- Activity Log ---
     public const string ActivityId = "activityid";
     public const string TimestampUtc = "timestamputc";

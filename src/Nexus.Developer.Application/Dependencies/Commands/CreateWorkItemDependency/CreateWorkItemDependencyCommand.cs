@@ -9,4 +9,5 @@ public sealed record CreateWorkItemDependencyCommand(
     Guid DownstreamId,
     WorkItemDependencyKind Kind,
     WorkItemDependencyRequiredState? RequiredState,
-    Guid CreatedByUserId);
+    Guid CreatedByUserId,
+    string? Reason = null);
