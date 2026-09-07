@@ -72,8 +72,8 @@ public class ExcelDevelopmentControlStoreTests
     };
 
     private static Node NewNode(string id, NodeId? parent, NodeType type, Status status,
-        bool breakdownComplete = false, IReadOnlyList<string>? dependencies = null) => new(
-        new NodeId(id), parent, type, "", "", "03", null, "Node " + id, null,
+        bool breakdownComplete = false, IReadOnlyList<string>? dependencies = null, string? phase = null) => new(
+        new NodeId(id), parent, type, "", "", "03", phase, "Node " + id, null,
         (dependencies ?? Array.Empty<string>()).Select(d => new NodeId(d)).ToArray(), false, Array.Empty<string>(),
         Array.Empty<string>(), Array.Empty<string>(), Array.Empty<string>(), null, null,
         status, breakdownComplete, null, null, null, "Durai", null, null, 0, false, "test",
@@ -372,13 +372,105 @@ public class ExcelDevelopmentControlStoreTests
         Assert.Throws<FileNotFoundException>(() => new ExcelDevelopmentControlStore(missing));
     }
 
+    // ------------------------------------------------------- SP1-M04 schema version
+
+    [Fact]
+    public async Task GovernedWrite_OnALegacyWorkbook_SucceedsAndStampsTheCurrentSchemaVersion()
+    {
+        // A workbook with NO marker is the documented legacy baseline: it reads exactly as it
+        // always has (no required-column throw), a governed write succeeds, and that write
+        // stamps the current schema-version marker so the file becomes self-declaring.
+        using var wb = new ExcelTestWorkbook();
+        using (var fresh = new XLWorkbook(wb.FilePath))
+            Assert.Equal(DevelopmentControlSchemaCategory.Legacy, DevelopmentControlWorkbookSchema.Read(fresh).Category);
+
+        var store = new ExcelDevelopmentControlStore(wb.FilePath);
+        var created = await store.CreateNodeAsync(
+            NewNode("M-07-9", null, NodeType.Milestone, Status.Planned), Envelope(NextChangeId()));
+        Assert.True(created.Success);
+
+        using var reopened = new XLWorkbook(wb.FilePath);
+        var schema = DevelopmentControlWorkbookSchema.Read(reopened);
+        Assert.Equal(DevelopmentControlSchemaCategory.Current, schema.Category);
+        Assert.Equal(DevelopmentControlWorkbookSchema.CurrentVersion, schema.DeclaredVersion);
+    }
+
+    [Fact]
+    public async Task GovernedWrite_OnAFutureVersionWorkbook_IsAControlledRefusal_LeavingTheFileUntouched()
+    {
+        using var wb = new ExcelTestWorkbook(declaredSchemaVersion: 999);
+        using (var fresh = new XLWorkbook(wb.FilePath))
+            Assert.Equal(DevelopmentControlSchemaCategory.Future, DevelopmentControlWorkbookSchema.Read(fresh).Category);
+        var before = File.ReadAllBytes(wb.FilePath);
+
+        var store = new ExcelDevelopmentControlStore(wb.FilePath);
+        var created = await store.CreateNodeAsync(
+            NewNode("M-07-9", null, NodeType.Milestone, Status.Planned), Envelope(NextChangeId()));
+
+        // The schema anomaly is surfaced as a failed result carrying the documented message --
+        // never an uncaught exception thrown mid-write.
+        Assert.False(created.Success);
+        Assert.Contains("newer than this build supports", Assert.Single(created.ValidationErrors));
+        Assert.Equal(before, File.ReadAllBytes(wb.FilePath)); // controlled refusal: canonical file byte-identical
+    }
+
+    [Fact]
+    public async Task AtomicWorkUnit_OnAFutureVersionWorkbook_AbortsAsAControlledFailure_LeavingTheFileUntouched()
+    {
+        using var wb = new ExcelTestWorkbook(declaredSchemaVersion: 999);
+        var before = File.ReadAllBytes(wb.FilePath);
+        var store = new ExcelDevelopmentControlStore(wb.FilePath);
+
+        var result = await store.ExecuteAtomicWorkUnitAsync<Node>(
+            async s => await s.CreateNodeAsync(
+                NewNode("M-07-9", null, NodeType.Milestone, Status.Planned), Envelope(NextChangeId())),
+            envelope: Envelope(NextChangeId()),
+            verifyEntityNodeId: null);
+
+        Assert.Equal(DevelopmentControlConcurrencyOutcome.ValidationFailure, result.Outcome);
+        Assert.Contains("newer than this build supports", Assert.Single(result.ValidationErrors));
+        Assert.Equal(before, File.ReadAllBytes(wb.FilePath)); // the unit saved nothing
+        Assert.Null(await store.GetNodeAsync(new NodeId("M-07-9")));
+    }
+
+    // ------------------------------------------- SP1-M04 node strategic-phase reading
+
+    [Fact]
+    public async Task Read_StrategicWavePhaseOnAFeature_AndOnADescendant_IsNonBlockingAndPreservesTheRawToken()
+    {
+        // SP1/SP2/SP3 are feature-level tokens; a descendant carrying one is an informational,
+        // NON-blocking observation. Reading a node with a strategic-wave phase must never throw
+        // and must preserve the raw free-text token verbatim on the Node (no column added).
+        using var wb = new ExcelTestWorkbook();
+        var store = new ExcelDevelopmentControlStore(wb.FilePath);
+        var change = NextChangeId();
+        await store.CreateNodeAsync(
+            NewNode("F-07-SP1", null, NodeType.Feature, Status.Planned, phase: "SP1"), Envelope(change));
+        await store.CreateNodeAsync(
+            NewNode("WI-07-SP1-1", new NodeId("F-07-SP1"), NodeType.WorkItem, Status.Ready, phase: "SP1"),
+            Envelope(NextChangeId()));
+
+        var feature = await store.GetNodeAsync(new NodeId("F-07-SP1"));
+        var workItem = await store.GetNodeAsync(new NodeId("WI-07-SP1-1"));
+
+        Assert.NotNull(feature);
+        Assert.Equal("SP1", feature!.Phase);
+        Assert.NotNull(workItem);
+        Assert.Equal("SP1", workItem!.Phase);
+    }
+
     // ------------------------------------------------------------------ fixture
 
     // Builds a six-sheet development-control workbook (live header layouts) at a unique temp
     // path and deletes it on Dispose. Tests never touch the real NEXUS_DEVELOPMENT_CONTROL.xlsx.
     private sealed class ExcelTestWorkbook : IDisposable
     {
-        public ExcelTestWorkbook()
+        // SP1-M04: the fixture can OPTIONALLY stamp the schema-version marker pair onto the
+        // Control Center. Null (the default) builds a LEGACY workbook with no marker -- the
+        // documented pre-versioning baseline every governed write must keep reading unchanged.
+        // A non-null value declares that schema version, letting tests exercise the current-
+        // and future-version read/write paths against disposable copies only.
+        public ExcelTestWorkbook(int? declaredSchemaVersion = null)
         {
             var dir = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), $"nexus-dev-store-{Guid.NewGuid():N}"));
             FilePath = System.IO.Path.Combine(dir.FullName, "NEXUS_DEVELOPMENT_CONTROL.xlsx");
@@ -392,6 +484,11 @@ public class ExcelDevelopmentControlStoreTests
 
             var controlCenter = workbook.AddWorksheet("Control Center");
             controlCenter.Cell(2, 1).SetValue("Development Control\nWorkbook v1.0\nRoadmap v1.0");
+            if (declaredSchemaVersion is not null)
+            {
+                controlCenter.Cell(3, 1).SetValue("Schema Version");
+                controlCenter.Cell(3, 2).SetValue(declaredSchemaVersion.Value);
+            }
 
             workbook.SaveAs(FilePath);
         }

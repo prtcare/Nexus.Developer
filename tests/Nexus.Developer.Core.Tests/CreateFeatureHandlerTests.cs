@@ -1,3 +1,4 @@
+using Nexus.Developer.Application.Features;
 using Nexus.Developer.Application.Features.Commands.CreateFeature;
 using Nexus.Developer.Application.Scope;
 using Nexus.Developer.Core.Common.Identifiers;
@@ -60,6 +61,95 @@ public class CreateFeatureHandlerTests
         Assert.Empty(repository.Features);
     }
 
+    [Fact]
+    public async Task Create_UnderExistingParentInSameSubproject_SetsParentFeatureId()
+    {
+        var subprojectId = Guid.NewGuid();
+        var createdByUserId = Guid.NewGuid();
+        var scopeClient = new FakeScopeClient(
+            new ScopeSubproject(subprojectId, Guid.NewGuid(), "My Subproject", "SP-0001"));
+        var repository = new RecordingFeatureRepository();
+        var handler = new CreateFeatureHandler(scopeClient, repository);
+
+        var parentResult = await handler.HandleAsync(
+            new CreateFeatureCommand(
+                new SubprojectId(subprojectId),
+                Title: "Parent",
+                Description: "A parent",
+                CreatedByUserId: createdByUserId));
+        var parentId = parentResult.FeatureId;
+
+        var childResult = await handler.HandleAsync(
+            new CreateFeatureCommand(
+                new SubprojectId(subprojectId),
+                Title: "Child",
+                Description: "A subfeature",
+                CreatedByUserId: createdByUserId,
+                ParentFeatureId: parentId));
+
+        var child = repository.Features.Single(feature => feature.Id == childResult.FeatureId);
+        var parent = repository.Features.Single(feature => feature.Id == parentId);
+
+        Assert.Equal(parent.Id, child.ParentFeatureId);
+        Assert.Equal(parent.SubprojectId, child.SubprojectId);
+        Assert.Null(parent.ParentFeatureId);
+    }
+
+    [Fact]
+    public async Task Create_WhenParentDoesNotExist_ThrowsAndCreatesNothing()
+    {
+        var subprojectId = Guid.NewGuid();
+        var scopeClient = new FakeScopeClient(
+            new ScopeSubproject(subprojectId, Guid.NewGuid(), "My Subproject", "SP-0001"));
+        var repository = new RecordingFeatureRepository();
+        var handler = new CreateFeatureHandler(scopeClient, repository);
+        var missingParentId = FeatureId.New();
+
+        var ex = await Assert.ThrowsAsync<FeatureParentNotFoundException>(() =>
+            handler.HandleAsync(
+                new CreateFeatureCommand(
+                    new SubprojectId(subprojectId),
+                    Title: "Should not persist",
+                    Description: string.Empty,
+                    CreatedByUserId: Guid.NewGuid(),
+                    ParentFeatureId: missingParentId)));
+
+        Assert.Equal(missingParentId, ex.ParentFeatureId);
+        Assert.Equal($"The parent feature '{missingParentId}' does not exist.", ex.Message);
+        Assert.Empty(repository.Features);
+    }
+
+    [Fact]
+    public async Task Create_WhenParentInDifferentSubproject_ThrowsAndCreatesNothing()
+    {
+        var subprojectId = Guid.NewGuid();
+        var otherSubprojectId = Guid.NewGuid();
+        var scopeClient = new FakeScopeClient(
+            new ScopeSubproject(subprojectId, Guid.NewGuid(), "My Subproject", "SP-0001"),
+            new ScopeSubproject(otherSubprojectId, Guid.NewGuid(), "Other Subproject", "SP-0002"));
+        var parentInOtherSubproject = new Feature(
+            FeatureId.New(),
+            new SubprojectId(otherSubprojectId),
+            "Parent",
+            "parent in another subproject",
+            Guid.NewGuid(),
+            DateTimeOffset.UtcNow);
+        var repository = new RecordingFeatureRepository(parentInOtherSubproject);
+        var handler = new CreateFeatureHandler(scopeClient, repository);
+
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            handler.HandleAsync(
+                new CreateFeatureCommand(
+                    new SubprojectId(subprojectId),
+                    Title: "Should not persist",
+                    Description: string.Empty,
+                    CreatedByUserId: Guid.NewGuid(),
+                    ParentFeatureId: parentInOtherSubproject.Id)));
+
+        var persisted = repository.Features.Single();
+        Assert.Equal(parentInOtherSubproject.Id, persisted.Id);
+    }
+
     private sealed class FakeScopeClient : IScopeClient
     {
         private readonly IReadOnlyDictionary<SubprojectId, ScopeSubproject> _subprojects;
@@ -76,7 +166,10 @@ public class CreateFeatureHandlerTests
 
     private sealed class RecordingFeatureRepository : IFeatureRepository
     {
-        private readonly List<Feature> _features = new();
+        private readonly List<Feature> _features;
+
+        public RecordingFeatureRepository(params Feature[] features)
+            => _features = new List<Feature>(features);
 
         public IReadOnlyList<Feature> Features => _features;
 

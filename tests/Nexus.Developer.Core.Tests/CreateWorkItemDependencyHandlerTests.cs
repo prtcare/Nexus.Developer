@@ -60,6 +60,48 @@ public class CreateWorkItemDependencyHandlerTests
     }
 
     [Fact]
+    public async Task Create_WhenReasonSupplied_CarriesItOntoTheEdgeAndTheResult()
+    {
+        var dependencyRepo = new InMemoryWorkItemDependencyRepository();
+        var handler = CreateHandler(dependencies: dependencyRepo);
+
+        var result = await handler.HandleAsync(
+            new CreateWorkItemDependencyCommand(
+                WorkItemDependencyNodeType.Feature,
+                Guid.NewGuid(),
+                T,
+                Guid.NewGuid(),
+                WorkItemDependencyKind.Blocking,
+                WorkItemDependencyRequiredState.Merged,
+                Guid.NewGuid(),
+                Reason: "Blocks the feature until the task merges."));
+
+        Assert.Equal("Blocks the feature until the task merges.", result.Reason);
+        Assert.Equal("Blocks the feature until the task merges.", Assert.Single(dependencyRepo.Dependencies).Reason);
+    }
+
+    [Fact]
+    public async Task Create_WhenReasonBlank_EdgeAndResultCarryNull()
+    {
+        var dependencyRepo = new InMemoryWorkItemDependencyRepository();
+        var handler = CreateHandler(dependencies: dependencyRepo);
+
+        var result = await handler.HandleAsync(
+            new CreateWorkItemDependencyCommand(
+                WorkItemDependencyNodeType.Feature,
+                Guid.NewGuid(),
+                T,
+                Guid.NewGuid(),
+                WorkItemDependencyKind.Parallel,
+                RequiredState: null,
+                Guid.NewGuid(),
+                Reason: "   "));
+
+        Assert.Null(result.Reason);
+        Assert.Null(Assert.Single(dependencyRepo.Dependencies).Reason);
+    }
+
+    [Fact]
     public async Task Create_BlockingEdgeWithoutRequiredState_MeansFullCompletion()
     {
         var handler = CreateHandler(dependencies: new InMemoryWorkItemDependencyRepository());

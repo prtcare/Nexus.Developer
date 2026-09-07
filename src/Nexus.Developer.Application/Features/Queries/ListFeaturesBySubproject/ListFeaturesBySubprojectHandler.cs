@@ -27,7 +27,8 @@ public sealed class ListFeaturesBySubprojectHandler
                 feature.Status,
                 feature.CreatedByUserId,
                 feature.CreatedAt,
-                feature.Reference))
+                feature.Reference,
+                feature.ParentFeatureId))
             .ToList();
 
         return new ListFeaturesBySubprojectResult(results);

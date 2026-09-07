@@ -171,4 +171,94 @@ public class WorkItemDependencyTests
                 (WorkItemDependencyRequiredState)0,
                 Guid.NewGuid(), DateTimeOffset.UtcNow));
     }
+
+    // --- Reason (SP1-M04): optional additive descriptive text --------------------
+
+    [Fact]
+    public void Create_WhenNoReasonSupplied_DefaultsToNull()
+    {
+        var edge = new WorkItemDependency(
+            WorkItemDependencyId.New(),
+            WorkItemDependencyNodeType.Feature, Guid.NewGuid(),
+            WorkItemDependencyNodeType.Task, Guid.NewGuid(),
+            WorkItemDependencyKind.Blocking,
+            requiredState: null,
+            Guid.NewGuid(), DateTimeOffset.UtcNow);
+
+        Assert.Null(edge.Reason);
+    }
+
+    [Fact]
+    public void Create_WithAReason_RoundTripsTheTrimmedValue()
+    {
+        var edge = new WorkItemDependency(
+            WorkItemDependencyId.New(),
+            WorkItemDependencyNodeType.Feature, Guid.NewGuid(),
+            WorkItemDependencyNodeType.Task, Guid.NewGuid(),
+            WorkItemDependencyKind.Informational,
+            requiredState: null,
+            Guid.NewGuid(), DateTimeOffset.UtcNow,
+            reason: "  Blocks the P1 rollout until the API contract is stable.  ");
+
+        Assert.Equal("Blocks the P1 rollout until the API contract is stable.", edge.Reason);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("\t")]
+    [InlineData(" \r\n ")]
+    public void Create_BlankOrWhitespaceReason_IsNormalizedToNull(string? reason)
+    {
+        var edge = new WorkItemDependency(
+            WorkItemDependencyId.New(),
+            WorkItemDependencyNodeType.Feature, Guid.NewGuid(),
+            WorkItemDependencyNodeType.Task, Guid.NewGuid(),
+            WorkItemDependencyKind.Parallel,
+            requiredState: null,
+            Guid.NewGuid(), DateTimeOffset.UtcNow,
+            reason: reason);
+
+        Assert.Null(edge.Reason);
+    }
+
+    [Fact]
+    public void Create_WithReason_DoesNotAffectGraphOrGuardSemantics()
+    {
+        // Reason is purely descriptive: the self-dependency guard, RequiredState rules and kind
+        // semantics are unchanged when a reason is present.
+        var selfLoopId = Guid.NewGuid();
+        Assert.Throws<ArgumentException>(() =>
+            new WorkItemDependency(
+                WorkItemDependencyId.New(),
+                WorkItemDependencyNodeType.Task, selfLoopId,
+                WorkItemDependencyNodeType.Task, selfLoopId,
+                WorkItemDependencyKind.Blocking,
+                requiredState: null,
+                Guid.NewGuid(), DateTimeOffset.UtcNow,
+                reason: "self loop with reason"));
+
+        Assert.Throws<ArgumentException>(() =>
+            new WorkItemDependency(
+                WorkItemDependencyId.New(),
+                WorkItemDependencyNodeType.Feature, Guid.NewGuid(),
+                WorkItemDependencyNodeType.Task, Guid.NewGuid(),
+                WorkItemDependencyKind.Parallel,
+                WorkItemDependencyRequiredState.Merged,
+                Guid.NewGuid(), DateTimeOffset.UtcNow,
+                reason: "required state on parallel edge with reason"));
+
+        var edge = new WorkItemDependency(
+            WorkItemDependencyId.New(),
+            WorkItemDependencyNodeType.Feature, Guid.NewGuid(),
+            WorkItemDependencyNodeType.Task, Guid.NewGuid(),
+            WorkItemDependencyKind.Blocking,
+            WorkItemDependencyRequiredState.PrApproved,
+            Guid.NewGuid(), DateTimeOffset.UtcNow,
+            reason: "pr approved reason");
+        Assert.Equal(WorkItemDependencyKind.Blocking, edge.Kind);
+        Assert.Equal(WorkItemDependencyRequiredState.PrApproved, edge.RequiredState);
+        Assert.Equal("pr approved reason", edge.Reason);
+    }
 }

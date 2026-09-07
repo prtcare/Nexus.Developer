@@ -11,4 +11,5 @@ public sealed record GetFeatureResult(
     DevelopmentItemStatus Status,
     Guid CreatedByUserId,
     DateTimeOffset CreatedAt,
-    string Reference);
+    string Reference,
+    FeatureId? ParentFeatureId = null);

@@ -30,6 +30,11 @@ public sealed class GetDevelopmentRunHandler
             run.Status,
             run.CreatedByUserId,
             run.CreatedAt,
-            run.Reference);
+            run.Reference,
+            run.WorkerId,
+            run.WorkerType,
+            run.StartedAt,
+            run.CompletedAt,
+            run.ResultSummary);
     }
 }

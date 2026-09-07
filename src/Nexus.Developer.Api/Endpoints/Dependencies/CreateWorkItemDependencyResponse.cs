@@ -9,4 +9,5 @@ public sealed record CreateWorkItemDependencyResponse(
     string Kind,
     string? RequiredState,
     Guid CreatedByUserId,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    string? Reason);

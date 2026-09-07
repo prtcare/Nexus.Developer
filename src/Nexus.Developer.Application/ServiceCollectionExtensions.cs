@@ -7,9 +7,21 @@ using Nexus.Developer.Application.ChatCore.Commands.ConvertConversationToTask;
 using Nexus.Developer.Application.Dependencies.Commands.CreateWorkItemDependency;
 using Nexus.Developer.Application.Dependencies.Queries.GetBlockingChain;
 using Nexus.Developer.Application.Dependencies.Queries.ListDependenciesByNode;
+using Nexus.Developer.Application.DevelopmentControl.Commands.CompleteDevelopmentControlWorkItem;
+using Nexus.Developer.Application.DevelopmentControl.Commands.ReleaseDevelopmentControlReservation;
+using Nexus.Developer.Application.DevelopmentControl.Commands.ReserveDevelopmentControlWorkItem;
+using Nexus.Developer.Application.DevelopmentControl.Queries.GetActiveDevelopmentChanges;
+using Nexus.Developer.Application.DevelopmentControl.Queries.GetDevelopmentControlNode;
+using Nexus.Developer.Application.DevelopmentControl.Queries.GetDevelopmentControlState;
+using Nexus.Developer.Application.DevelopmentControl.Queries.RunDevelopmentControlPreflight;
+using Nexus.Developer.Application.DevelopmentRuns.Commands.CancelDevelopmentRun;
 using Nexus.Developer.Application.DevelopmentRuns.Commands.CreateDevelopmentRun;
+using Nexus.Developer.Application.DevelopmentRuns.Commands.FailDevelopmentRun;
+using Nexus.Developer.Application.DevelopmentRuns.Commands.StartDevelopmentRun;
+using Nexus.Developer.Application.DevelopmentRuns.Commands.SucceedDevelopmentRun;
 using Nexus.Developer.Application.DevelopmentRuns.Queries.GetDevelopmentRun;
 using Nexus.Developer.Application.Features.Commands.CreateFeature;
+using Nexus.Developer.Application.Features.Commands.SetFeatureParent;
 using Nexus.Developer.Application.Features.Queries.GetFeature;
 using Nexus.Developer.Application.Features.Queries.ListFeaturesBySubproject;
 using Nexus.Developer.Application.Issues.Commands.CreateIssue;
@@ -40,6 +52,7 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services)
     {
         services.AddScoped<CreateFeatureHandler>();
+        services.AddScoped<SetFeatureParentHandler>();
         services.AddScoped<GetFeatureHandler>();
         services.AddScoped<ListFeaturesBySubprojectHandler>();
 
@@ -66,6 +79,20 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<CreateDevelopmentRunHandler>();
         services.AddScoped<GetDevelopmentRunHandler>();
+        services.AddScoped<StartDevelopmentRunHandler>();
+        services.AddScoped<CancelDevelopmentRunHandler>();
+        services.AddScoped<SucceedDevelopmentRunHandler>();
+        services.AddScoped<FailDevelopmentRunHandler>();
+
+        // Development Control plane (SP1-M05): read queries + governed mutation handlers over
+        // the guarded store registered by AddDevelopmentControl.
+        services.AddScoped<GetDevelopmentControlStateHandler>();
+        services.AddScoped<GetDevelopmentControlNodeHandler>();
+        services.AddScoped<GetActiveDevelopmentChangesHandler>();
+        services.AddScoped<RunDevelopmentControlPreflightHandler>();
+        services.AddScoped<ReserveDevelopmentControlWorkItemHandler>();
+        services.AddScoped<ReleaseDevelopmentControlReservationHandler>();
+        services.AddScoped<CompleteDevelopmentControlWorkItemHandler>();
 
         services.AddScoped<CreateWorkItemDependencyHandler>();
         services.AddScoped<GetBlockingChainHandler>();

@@ -61,5 +61,126 @@ public class FeatureTests
         Assert.Equal("FEA-00000042", feature.Reference);
         Assert.Equal(createdBy, feature.CreatedByUserId);
         Assert.Equal(createdAt, feature.CreatedAt);
+        Assert.Null(feature.ParentFeatureId);
+    }
+
+    [Fact]
+    public void Create_IsRootByDefault()
+    {
+        var feature = new Feature(FeatureId.New(), SubprojectId.New(), "F", "d", Guid.NewGuid(), DateTimeOffset.UtcNow);
+
+        Assert.Null(feature.ParentFeatureId);
+    }
+
+    [Fact]
+    public void Create_WithParentFeatureId_SetsParent()
+    {
+        var subprojectId = SubprojectId.New();
+        var parentId = FeatureId.New();
+
+        var feature = new Feature(FeatureId.New(), subprojectId, "Child", "d", Guid.NewGuid(), DateTimeOffset.UtcNow, parentId);
+
+        Assert.Equal(parentId, feature.ParentFeatureId);
+    }
+
+    [Fact]
+    public void Create_WhenParentFeatureIdEqualsOwnId_Throws()
+    {
+        var id = FeatureId.New();
+
+        Assert.Throws<ArgumentException>(() =>
+            new Feature(id, SubprojectId.New(), "F", "d", Guid.NewGuid(), DateTimeOffset.UtcNow, id));
+    }
+
+    [Fact]
+    public void Restore_RoundTripsParentFeatureId()
+    {
+        var id = FeatureId.New();
+        var subprojectId = SubprojectId.New();
+        var parentId = FeatureId.New();
+        var createdAt = DateTimeOffset.UtcNow;
+        var createdBy = Guid.NewGuid();
+
+        var feature = Feature.Restore(
+            id, subprojectId, "Existing", "desc", DevelopmentItemStatus.Active,
+            createdBy, createdAt, "FEA-00000042", parentId);
+
+        Assert.Equal(parentId, feature.ParentFeatureId);
+    }
+
+    [Fact]
+    public void SetParent_Null_PromotesChildToRoot()
+    {
+        var subprojectId = SubprojectId.New();
+        var parentId = FeatureId.New();
+        var child = new Feature(FeatureId.New(), subprojectId, "Child", "d", Guid.NewGuid(), DateTimeOffset.UtcNow, parentId);
+
+        child.SetParent(parent: null);
+
+        Assert.Null(child.ParentFeatureId);
+    }
+
+    [Fact]
+    public void SetParent_OnRootToNull_IsNoOp()
+    {
+        var feature = new Feature(FeatureId.New(), SubprojectId.New(), "F", "d", Guid.NewGuid(), DateTimeOffset.UtcNow);
+
+        feature.SetParent(parent: null);
+
+        Assert.Null(feature.ParentFeatureId);
+    }
+
+    [Fact]
+    public void SetParent_Self_ThrowsAndDoesNotChange()
+    {
+        var feature = new Feature(FeatureId.New(), SubprojectId.New(), "F", "d", Guid.NewGuid(), DateTimeOffset.UtcNow);
+
+        Assert.Throws<ArgumentException>(() => feature.SetParent(feature));
+
+        Assert.Null(feature.ParentFeatureId);
+    }
+
+    [Fact]
+    public void SetParent_ParentInDifferentSubproject_ThrowsAndDoesNotChange()
+    {
+        var subprojectA = SubprojectId.New();
+        var subprojectB = SubprojectId.New();
+        var by = Guid.NewGuid();
+        var feature = new Feature(FeatureId.New(), subprojectA, "Child", "d", by, DateTimeOffset.UtcNow);
+        var otherSubprojectFeature = new Feature(FeatureId.New(), subprojectB, "Parent", "d", by, DateTimeOffset.UtcNow);
+
+        Assert.Throws<ArgumentException>(() => feature.SetParent(otherSubprojectFeature));
+
+        Assert.Null(feature.ParentFeatureId);
+    }
+
+    [Fact]
+    public void SetParent_ValidParent_SetsParentFeatureId()
+    {
+        var subprojectId = SubprojectId.New();
+        var by = Guid.NewGuid();
+        var child = new Feature(FeatureId.New(), subprojectId, "Child", "d", by, DateTimeOffset.UtcNow);
+        var parent = new Feature(FeatureId.New(), subprojectId, "Parent", "d", by, DateTimeOffset.UtcNow);
+
+        child.SetParent(parent);
+
+        Assert.Equal(parent.Id, child.ParentFeatureId);
+    }
+
+    [Fact]
+    public void SetParent_ToAFeatureThatItselfHasAParent_IsAllowed_MultiLevelHierarchy()
+    {
+        // D04: a child may itself have children (multi-level). Only ancestor
+        // cycles are forbidden, and that rule is enforced at the write boundary.
+        var subprojectId = SubprojectId.New();
+        var by = Guid.NewGuid();
+        var root = new Feature(FeatureId.New(), subprojectId, "Root", "d", by, DateTimeOffset.UtcNow);
+        var middle = new Feature(FeatureId.New(), subprojectId, "Middle", "d", by, DateTimeOffset.UtcNow, root.Id);
+        var leaf = new Feature(FeatureId.New(), subprojectId, "Leaf", "d", by, DateTimeOffset.UtcNow);
+
+        leaf.SetParent(middle);
+
+        Assert.Equal(middle.Id, leaf.ParentFeatureId);
+        Assert.Equal(root.Id, middle.ParentFeatureId);
     }
 }

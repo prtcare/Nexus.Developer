@@ -60,7 +60,8 @@ public static class DependencyEndpoint
                             request.DownstreamId,
                             kind,
                             requiredState,
-                            request.CreatedByUserId),
+                            request.CreatedByUserId,
+                            request.Reason),
                         cancellationToken);
 
                     return Results.Ok(
@@ -73,7 +74,8 @@ public static class DependencyEndpoint
                             result.Kind.ToString(),
                             result.RequiredState?.ToString(),
                             result.CreatedByUserId,
-                            result.CreatedAt));
+                            result.CreatedAt,
+                            result.Reason));
                 }
                 catch (WorkItemDependencyTargetNotFoundException ex)
                 {
@@ -124,7 +126,8 @@ public static class DependencyEndpoint
                         dependency.Kind.ToString(),
                         dependency.RequiredState?.ToString(),
                         dependency.CreatedByUserId,
-                        dependency.CreatedAt))
+                        dependency.CreatedAt,
+                        dependency.Reason))
                     .ToList();
 
                 return Results.Ok(dependencies);
