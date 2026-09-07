@@ -183,4 +183,71 @@ public class FeatureTests
         Assert.Equal(middle.Id, leaf.ParentFeatureId);
         Assert.Equal(root.Id, middle.ParentFeatureId);
     }
+
+    [Fact]
+    public void Create_WithSourceRoadmapNodeId_TrimsAndSets_IdentityUnchanged()
+    {
+        var id = FeatureId.New();
+        var subprojectId = SubprojectId.New();
+        var createdAt = DateTimeOffset.UtcNow;
+
+        // WU-02 narrow bridge: an optional roadmap-ledger NodeId string may tag a
+        // Feature at creation. It is traceability only -- it must never change the
+        // aggregate's own Guid identity.
+        var feature = new Feature(
+            id, subprojectId, "F", "d", Guid.NewGuid(), createdAt,
+            parentFeatureId: null, sourceRoadmapNodeId: "  F-07-10  ");
+
+        Assert.Equal("F-07-10", feature.SourceRoadmapNodeId);
+        Assert.Equal(id, feature.Id);
+        Assert.Equal(subprojectId, feature.SubprojectId);
+        Assert.Equal(createdAt, feature.CreatedAt);
+        Assert.Equal(string.Empty, feature.Reference);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
+    public void Create_BlankSourceRoadmapNodeId_IsNull(string? sourceRoadmapNodeId)
+    {
+        var feature = new Feature(
+            FeatureId.New(), SubprojectId.New(), "F", "d", Guid.NewGuid(), DateTimeOffset.UtcNow,
+            sourceRoadmapNodeId: sourceRoadmapNodeId);
+
+        Assert.Null(feature.SourceRoadmapNodeId);
+    }
+
+    [Fact]
+    public void Create_SourceRoadmapNodeId_NullByDefault()
+    {
+        // No Feature today is roadmap-originated; the field is dormant until the
+        // roadmap importer (WI-07-1.1.3) exists.
+        var feature = new Feature(FeatureId.New(), SubprojectId.New(), "F", "d", Guid.NewGuid(), DateTimeOffset.UtcNow);
+
+        Assert.Null(feature.SourceRoadmapNodeId);
+    }
+
+    [Fact]
+    public void Restore_RoundTripsSourceRoadmapNodeId()
+    {
+        var id = FeatureId.New();
+        var feature = Feature.Restore(
+            id, SubprojectId.New(), "Existing", "desc", DevelopmentItemStatus.Active,
+            Guid.NewGuid(), DateTimeOffset.UtcNow, "FEA-00000042",
+            parentFeatureId: null, sourceRoadmapNodeId: "F-07-10");
+
+        Assert.Equal("F-07-10", feature.SourceRoadmapNodeId);
+        Assert.Equal(id, feature.Id);
+    }
+
+    [Fact]
+    public void Restore_SourceRoadmapNodeId_IsNull_ForOrdinaryFeatures()
+    {
+        var feature = Feature.Restore(
+            FeatureId.New(), SubprojectId.New(), "Existing", "desc", DevelopmentItemStatus.Active,
+            Guid.NewGuid(), DateTimeOffset.UtcNow, "FEA-00000043");
+
+        Assert.Null(feature.SourceRoadmapNodeId);
+    }
 }

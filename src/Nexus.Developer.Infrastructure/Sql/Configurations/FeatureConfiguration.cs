@@ -61,6 +61,14 @@ public sealed class FeatureConfiguration : IEntityTypeConfiguration<DomainFeatur
         builder.Property(feature => feature.CreatedAt)
             .IsRequired();
 
+        // WU-02 narrow bridge (WAVE-05A Lane D): external roadmap-ledger NodeId
+        // string, traceability only. Nullable (no Feature has a roadmap origin yet);
+        // deliberately not indexed -- nothing reads in by it today, and the roadmap
+        // importer (WI-07-1.1.3) is the future single writer. Never a Guid.
+        builder.Property(feature => feature.SourceRoadmapNodeId)
+            .HasMaxLength(200)
+            .IsRequired(false);
+
         builder.Property<int>("Seq")
             .ValueGeneratedOnAdd()
             .UseIdentityColumn();

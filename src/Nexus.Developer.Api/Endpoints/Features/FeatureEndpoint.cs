@@ -38,7 +38,8 @@ public static class FeatureEndpoint
                             request.CreatedByUserId,
                             ParentFeatureId: request.ParentFeatureId is Guid parentId
                                 ? new FeatureId(parentId)
-                                : null),
+                                : null,
+                            SourceRoadmapNodeId: request.SourceRoadmapNodeId),
                         cancellationToken);
 
                     return Results.Ok(

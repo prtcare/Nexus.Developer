@@ -64,7 +64,8 @@ public sealed class CreateFeatureHandler
             command.Description,
             command.CreatedByUserId,
             DateTimeOffset.UtcNow,
-            command.ParentFeatureId);
+            command.ParentFeatureId,
+            command.SourceRoadmapNodeId);
 
         await _repository.AddAsync(feature, cancellationToken);
 

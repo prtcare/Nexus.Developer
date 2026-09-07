@@ -6,4 +6,5 @@ public sealed record CreateTaskCommand(
     FeatureId FeatureId,
     string Title,
     string Description,
-    Guid CreatedByUserId);
+    Guid CreatedByUserId,
+    string? SourceRoadmapNodeId = null);
