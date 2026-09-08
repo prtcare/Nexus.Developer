@@ -31,7 +31,8 @@ public static class TaskEndpoint
                         new FeatureId(request.FeatureId),
                         request.Title,
                         request.Description ?? string.Empty,
-                        request.CreatedByUserId),
+                        request.CreatedByUserId,
+                        SourceRoadmapNodeId: request.SourceRoadmapNodeId),
                     cancellationToken);
 
                 return Results.Ok(

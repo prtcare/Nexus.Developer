@@ -37,6 +37,9 @@ public static class StronglyTypedIdConverters
     public static readonly ValueConverter<DevelopmentRunId, Guid> DevelopmentRunId =
         new(id => id.Value, value => new DevelopmentRunId(value));
 
+    public static readonly ValueConverter<WorkItemDependencyId, Guid> WorkItemDependencyId =
+        new(id => id.Value, value => new WorkItemDependencyId(value));
+
     public static readonly ValueConverter<SubprojectId, Guid> SubprojectId =
         new(id => id.Value, value => new SubprojectId(value));
 }

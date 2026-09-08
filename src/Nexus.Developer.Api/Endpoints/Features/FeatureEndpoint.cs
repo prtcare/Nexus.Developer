@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Nexus.Developer.Application.Features;
 using Nexus.Developer.Application.Features.Commands.CreateFeature;
 using Nexus.Developer.Application.Features.Queries.GetFeature;
 using Nexus.Developer.Application.Features.Queries.ListFeaturesBySubproject;
@@ -34,7 +35,11 @@ public static class FeatureEndpoint
                             new SubprojectId(request.SubprojectId),
                             request.Title,
                             request.Description ?? string.Empty,
-                            request.CreatedByUserId),
+                            request.CreatedByUserId,
+                            ParentFeatureId: request.ParentFeatureId is Guid parentId
+                                ? new FeatureId(parentId)
+                                : null,
+                            SourceRoadmapNodeId: request.SourceRoadmapNodeId),
                         cancellationToken);
 
                     return Results.Ok(
@@ -49,6 +54,18 @@ public static class FeatureEndpoint
                     // (a foreign reference, not the resource being created), so
                     // 400 -- matching the Title-required check above, never an
                     // unhandled 500.
+                    return Results.BadRequest(new { error = ex.Message });
+                }
+                catch (FeatureParentNotFoundException ex)
+                {
+                    // A named parent Feature that does not exist is invalid
+                    // caller-supplied input on a create call -- 400.
+                    return Results.BadRequest(new { error = ex.Message });
+                }
+                catch (ArgumentException ex)
+                {
+                    // Domain shape validation surfaced through the create call
+                    // (e.g. a parent Feature from a different Subproject) -- 400.
                     return Results.BadRequest(new { error = ex.Message });
                 }
             });
@@ -78,7 +95,8 @@ public static class FeatureEndpoint
                         (int)result.Status,
                         result.CreatedByUserId,
                         result.CreatedAt,
-                        result.Reference));
+                        result.Reference,
+                        result.ParentFeatureId?.Value));
             });
 
         app.MapGet(
@@ -101,7 +119,8 @@ public static class FeatureEndpoint
                         (int)feature.Status,
                         feature.CreatedByUserId,
                         feature.CreatedAt,
-                        feature.Reference))
+                        feature.Reference,
+                        feature.ParentFeatureId?.Value))
                     .ToList();
 
                 return Results.Ok(features);

@@ -4,4 +4,5 @@ public sealed record CreateTaskRequest(
     Guid FeatureId,
     string Title,
     string? Description,
-    Guid CreatedByUserId);
+    Guid CreatedByUserId,
+    string? SourceRoadmapNodeId = null);

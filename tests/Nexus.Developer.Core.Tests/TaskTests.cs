@@ -52,4 +52,65 @@ public class TaskTests
 
         Assert.Null(task.MigratedFromWorkItemId);
     }
+
+    [Fact]
+    public void Create_WithSourceRoadmapNodeId_TrimsAndSets_IdentityUnchanged()
+    {
+        var id = TaskId.New();
+        var featureId = FeatureId.New();
+        var createdAt = DateTimeOffset.UtcNow;
+
+        // WU-02 narrow bridge: an optional roadmap-ledger NodeId string may tag a
+        // Task at creation. Traceability only -- never alters the aggregate's own
+        // Guid identity, and distinct from MigratedFromWorkItemId (Chat WorkItem
+        // provenance, a Guid).
+        var task = new DeveloperTask(
+            id, featureId, "T", "d", Guid.NewGuid(), createdAt,
+            sourceRoadmapNodeId: "  WI-07-2.1.1  ");
+
+        Assert.Equal("WI-07-2.1.1", task.SourceRoadmapNodeId);
+        Assert.Null(task.MigratedFromWorkItemId);
+        Assert.Equal(id, task.Id);
+        Assert.Equal(featureId, task.FeatureId);
+        Assert.Equal(string.Empty, task.Reference);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
+    public void Create_BlankSourceRoadmapNodeId_IsNull(string? sourceRoadmapNodeId)
+    {
+        var task = new DeveloperTask(
+            TaskId.New(), FeatureId.New(), "T", "d", Guid.NewGuid(), DateTimeOffset.UtcNow,
+            sourceRoadmapNodeId: sourceRoadmapNodeId);
+
+        Assert.Null(task.SourceRoadmapNodeId);
+    }
+
+    [Fact]
+    public void Create_SourceRoadmapNodeId_NullByDefault()
+    {
+        // No Task today is roadmap-originated; the field is dormant until the
+        // roadmap importer (WI-07-1.1.3) exists.
+        var task = new DeveloperTask(
+            TaskId.New(), FeatureId.New(), "T", "d", Guid.NewGuid(), DateTimeOffset.UtcNow);
+
+        Assert.Null(task.SourceRoadmapNodeId);
+    }
+
+    [Fact]
+    public void Restore_RoundTripsSourceRoadmapNodeId()
+    {
+        var id = TaskId.New();
+        var task = DeveloperTask.Restore(
+            id, FeatureId.New(), "T", "d", DevelopmentItemStatus.Completed,
+            Guid.NewGuid(), DateTimeOffset.UtcNow, "TSK-00000007",
+            migratedFromWorkItemId: null, sourceRoadmapNodeId: "T-07-1");
+
+        Assert.Equal("T-07-1", task.SourceRoadmapNodeId);
+        Assert.Null(task.MigratedFromWorkItemId);
+        Assert.Equal(id, task.Id);
+        Assert.Equal(DevelopmentItemStatus.Completed, task.Status);
+    }
 }

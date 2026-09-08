@@ -23,7 +23,8 @@ public sealed class Task : AggregateRoot<TaskId>
         string title,
         string description,
         Guid createdByUserId,
-        DateTimeOffset createdAt)
+        DateTimeOffset createdAt,
+        string? sourceRoadmapNodeId = null)
         : base(id)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
@@ -34,6 +35,9 @@ public sealed class Task : AggregateRoot<TaskId>
         Status = DevelopmentItemStatus.New;
         CreatedByUserId = createdByUserId;
         CreatedAt = createdAt;
+        SourceRoadmapNodeId = string.IsNullOrWhiteSpace(sourceRoadmapNodeId)
+            ? null
+            : sourceRoadmapNodeId.Trim();
     }
 
     // WI-07-10.2.1: one-time, reviewable migration path from the Chat product's
@@ -64,7 +68,8 @@ public sealed class Task : AggregateRoot<TaskId>
         Guid createdByUserId,
         DateTimeOffset createdAt,
         string reference,
-        Guid? migratedFromWorkItemId)
+        Guid? migratedFromWorkItemId,
+        string? sourceRoadmapNodeId = null)
         : base(id)
     {
         FeatureId = featureId;
@@ -75,6 +80,7 @@ public sealed class Task : AggregateRoot<TaskId>
         CreatedAt = createdAt;
         Reference = reference;
         MigratedFromWorkItemId = migratedFromWorkItemId;
+        SourceRoadmapNodeId = sourceRoadmapNodeId;
     }
 
     public FeatureId FeatureId { get; }
@@ -95,6 +101,17 @@ public sealed class Task : AggregateRoot<TaskId>
     // created directly through Developer Chat / the Developer UI.
     public Guid? MigratedFromWorkItemId { get; private set; }
 
+    // WU-02 narrow bridge (WAVE-05A Lane D): optional, external traceability only.
+    // Holds the roadmap-ledger NodeId string (e.g. "WI-07-2.1.1", "T-07-1") that
+    // originated this Task when the roadmap importer (WI-07-1.1.3) wrote it.
+    // Never a Guid, never runtime identity, never routing authority, never a
+    // substitute for DevelopmentControlAddress. Plain external reference string;
+    // null for every Task created without a roadmap origin. Set only at
+    // construction (blank -> null); carried through Restore. Distinct from
+    // MigratedFromWorkItemId (Chat WorkItem provenance, a Guid) -- that field
+    // stays the migration-script writer's; this one is the roadmap ledger.
+    public string? SourceRoadmapNodeId { get; }
+
     public static Task Restore(
         TaskId id,
         FeatureId featureId,
@@ -104,8 +121,9 @@ public sealed class Task : AggregateRoot<TaskId>
         Guid createdByUserId,
         DateTimeOffset createdAt,
         string reference,
-        Guid? migratedFromWorkItemId)
-        => new(id, featureId, title, description, status, createdByUserId, createdAt, reference, migratedFromWorkItemId);
+        Guid? migratedFromWorkItemId,
+        string? sourceRoadmapNodeId = null)
+        => new(id, featureId, title, description, status, createdByUserId, createdAt, reference, migratedFromWorkItemId, sourceRoadmapNodeId);
 
     public void Rename(string title)
     {

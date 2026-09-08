@@ -6,4 +6,6 @@ public sealed record CreateFeatureCommand(
     SubprojectId SubprojectId,
     string Title,
     string Description,
-    Guid CreatedByUserId);
+    Guid CreatedByUserId,
+    FeatureId? ParentFeatureId = null,
+    string? SourceRoadmapNodeId = null);

@@ -8,4 +8,5 @@ public sealed record GetFeatureResponse(
     int Status,
     Guid CreatedByUserId,
     DateTimeOffset CreatedAt,
-    string Reference);
+    string Reference,
+    Guid? ParentFeatureId = null);

@@ -4,4 +4,6 @@ public sealed record CreateFeatureRequest(
     Guid SubprojectId,
     string Title,
     string? Description,
-    Guid CreatedByUserId);
+    Guid CreatedByUserId,
+    Guid? ParentFeatureId = null,
+    string? SourceRoadmapNodeId = null);

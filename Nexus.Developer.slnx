@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src\Nexus.DevelopmentControl.Contracts\Nexus.DevelopmentControl.Contracts.csproj" />
     <Project Path="src\Nexus.Developer.Core\Nexus.Developer.Core.csproj" />
     <Project Path="src\Nexus.Developer.Application\Nexus.Developer.Application.csproj" />
     <Project Path="src\Nexus.Developer.Infrastructure\Nexus.Developer.Infrastructure.csproj" />

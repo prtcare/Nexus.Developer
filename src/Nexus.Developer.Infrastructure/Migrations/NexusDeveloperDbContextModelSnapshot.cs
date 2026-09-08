@@ -23,6 +23,50 @@ namespace Nexus.Developer.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Nexus.Developer.Core.Dependencies.WorkItemDependency", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DownstreamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DownstreamType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int?>("RequiredState")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UpstreamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("UpstreamType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DownstreamType", "DownstreamId")
+                        .HasDatabaseName("IX_WorkItemDependency_Downstream");
+
+                    b.HasIndex("UpstreamType", "UpstreamId")
+                        .HasDatabaseName("IX_WorkItemDependency_Upstream");
+
+                    b.ToTable("WorkItemDependency", "dev");
+                });
+
             modelBuilder.Entity("Nexus.Developer.Core.DevelopmentRuns.DevelopmentRun", b =>
                 {
                     b.Property<Guid>("Id")
@@ -30,6 +74,9 @@ namespace Nexus.Developer.Infrastructure.Migrations
 
                     b.Property<Guid?>("CheckSetId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
@@ -56,11 +103,17 @@ namespace Nexus.Developer.Infrastructure.Migrations
                     b.Property<Guid?>("ResultId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ResultSummary")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Seq")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Seq"));
+
+                    b.Property<DateTimeOffset?>("StartedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -73,6 +126,14 @@ namespace Nexus.Developer.Infrastructure.Migrations
 
                     b.Property<Guid?>("VerificationId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("WorkerId")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("WorkerType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -101,6 +162,9 @@ namespace Nexus.Developer.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("ParentFeatureId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Reference")
                         .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
@@ -114,6 +178,10 @@ namespace Nexus.Developer.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Seq"));
 
+                    b.Property<string>("SourceRoadmapNodeId")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -126,6 +194,9 @@ namespace Nexus.Developer.Infrastructure.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ParentFeatureId")
+                        .HasDatabaseName("IX_Feature_ParentFeatureId");
 
                     b.HasIndex("Reference")
                         .IsUnique()
@@ -417,6 +488,10 @@ namespace Nexus.Developer.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Seq"));
 
+                    b.Property<string>("SourceRoadmapNodeId")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -437,6 +512,15 @@ namespace Nexus.Developer.Infrastructure.Migrations
                         .HasDatabaseName("UQ_Task_Ref");
 
                     b.ToTable("Task", "dev");
+                });
+
+            modelBuilder.Entity("Nexus.Developer.Core.Features.Feature", b =>
+                {
+                    b.HasOne("Nexus.Developer.Core.Features.Feature", null)
+                        .WithMany()
+                        .HasForeignKey("ParentFeatureId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_Feature_ParentFeature");
                 });
 
             modelBuilder.Entity("Nexus.Developer.Core.Issues.IssueLink", b =>

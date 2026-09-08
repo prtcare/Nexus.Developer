@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Nexus.Developer.Core.Dependencies;
 using Nexus.Developer.Core.DevelopmentRuns;
 using Nexus.Developer.Core.Features;
 using Nexus.Developer.Core.Issues;
@@ -12,7 +13,8 @@ namespace Nexus.Developer.Infrastructure.Sql;
 
 // Persistence for the F-07-10 Developer domain foundation only (Feature, Task,
 // Subtask, Milestone, MilestoneLink, Issue, IssueLink, ObjectChatLink,
-// DevelopmentRun). Owns its own database ("NexusDeveloper") and schema ("dev") --
+// DevelopmentRun, WorkItemDependency). Owns its own database ("NexusDeveloper")
+// and schema ("dev") --
 // AGENTS.md's boundary rule forbids Nexus.Developer from using a product
 // DbContext or database, and this also anticipates the still-deferred M-02-1.5
 // layer-schema convention without needing a later rename.
@@ -41,6 +43,8 @@ public sealed class NexusDeveloperDbContext : DbContext
 
     public DbSet<DevelopmentRun> DevelopmentRuns => Set<DevelopmentRun>();
 
+    public DbSet<WorkItemDependency> WorkItemDependencies => Set<WorkItemDependency>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("dev");
@@ -54,6 +58,7 @@ public sealed class NexusDeveloperDbContext : DbContext
         modelBuilder.ApplyConfiguration(new IssueLinkConfiguration());
         modelBuilder.ApplyConfiguration(new ObjectChatLinkConfiguration());
         modelBuilder.ApplyConfiguration(new DevelopmentRunConfiguration());
+        modelBuilder.ApplyConfiguration(new WorkItemDependencyConfiguration());
 
         base.OnModelCreating(modelBuilder);
     }
