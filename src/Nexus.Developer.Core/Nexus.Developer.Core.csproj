@@ -20,4 +20,16 @@
     <PackageReference Include="Nexus.ProductCore.Contracts" Version="0.1.0-*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!--
+      Bootstrap-safe shared DevelopmentControl contract assembly (SP1-WAVE-04 Lane A): the
+      pure zero-IO DevelopmentControl value contracts were physically extracted from this
+      project's DevelopmentControl folder into Nexus.DevelopmentControl.Contracts so Forge /
+      Foundation tools can bundle them with no Excel/EF/DI/runtime and no Nexus.Developer.Core
+      dependency. The behavioral implementations (guarded store, atomic-write coordinator,
+      named mutex/semaphore write locks) remain in this project.
+    -->
+    <ProjectReference Include="..\Nexus.DevelopmentControl.Contracts\Nexus.DevelopmentControl.Contracts.csproj" />
+  </ItemGroup>
+
 </Project>

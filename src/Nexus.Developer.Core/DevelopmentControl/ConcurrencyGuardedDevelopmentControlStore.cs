@@ -16,17 +16,9 @@ namespace Nexus.Developer.Core.DevelopmentControl;
 // lock-failure classification. Callers that need a structured outcome use
 // ExecuteAtomicWriteAsync (returns AtomicWriteResult<T> with the full
 // DevelopmentControlConcurrencyOutcome) or the DevelopmentControlAtomicWriteCoordinator.
-public interface IConcurrencyGuardedDevelopmentControlStore : IDevelopmentControlStore
-{
-    IDevelopmentControlStore Inner { get; }
-    DevelopmentControlMutexIdentity MutexIdentity { get; }
-    TimeSpan LockTimeout { get; }
-
-    Task<AtomicWriteResult<T>> ExecuteAtomicWriteAsync<T>(
-        AtomicWriteRequest<T> request,
-        CancellationToken cancellationToken = default) where T : class;
-}
-
+// The IConcurrencyGuardedDevelopmentControlStore contract now lives in the bootstrap-safe
+// shared assembly Nexus.DevelopmentControl.Contracts (SP1-WAVE-04 Lane A). This file keeps
+// only the concrete guarded-store runtime decorator.
 public sealed class ConcurrencyGuardedDevelopmentControlStore : IConcurrencyGuardedDevelopmentControlStore
 {
     private readonly IDevelopmentControlStore _inner;
