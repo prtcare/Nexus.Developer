@@ -42,6 +42,54 @@ public class CreateFeatureHandlerTests
     }
 
     [Fact]
+    public async Task Create_WhenCallerSuppliesSourceRoadmapNodeId_SetsItOnFeature()
+    {
+        // WU-02 narrow bridge (WAVE-05A Lane D): the roadmap importer
+        // (WI-07-1.1.3) will be a caller of the create contract, tagging the
+        // Feature with the roadmap-ledger NodeId that originated it. Optional and
+        // traceability-only -- the aggregate normalizes blank -> null and trims.
+        var subprojectId = Guid.NewGuid();
+        var scopeClient = new FakeScopeClient(
+            new ScopeSubproject(subprojectId, Guid.NewGuid(), "My Subproject", "SP-0001"));
+        var repository = new RecordingFeatureRepository();
+        var handler = new CreateFeatureHandler(scopeClient, repository);
+
+        var result = await handler.HandleAsync(
+            new CreateFeatureCommand(
+                new SubprojectId(subprojectId),
+                Title: "New Feature",
+                Description: "A feature",
+                CreatedByUserId: Guid.NewGuid(),
+                SourceRoadmapNodeId: "  F-07-10  "));
+
+        var feature = Assert.Single(repository.Features);
+
+        Assert.Equal("F-07-10", feature.SourceRoadmapNodeId);
+        Assert.Equal(feature.Id, result.FeatureId);
+    }
+
+    [Fact]
+    public async Task Create_WhenNoSourceRoadmapNodeIdSupplied_FeatureHasNone()
+    {
+        // The field must stay null for ordinary creates -- dormant until the
+        // roadmap importer exists; no roadmap tag is ever fabricated.
+        var subprojectId = Guid.NewGuid();
+        var scopeClient = new FakeScopeClient(
+            new ScopeSubproject(subprojectId, Guid.NewGuid(), "My Subproject", "SP-0001"));
+        var repository = new RecordingFeatureRepository();
+        var handler = new CreateFeatureHandler(scopeClient, repository);
+
+        await handler.HandleAsync(
+            new CreateFeatureCommand(
+                new SubprojectId(subprojectId),
+                Title: "New Feature",
+                Description: "A feature",
+                CreatedByUserId: Guid.NewGuid()));
+
+        Assert.Null(Assert.Single(repository.Features).SourceRoadmapNodeId);
+    }
+
+    [Fact]
     public async Task Create_WhenSubprojectDoesNotExist_ThrowsAndCreatesNothing()
     {
         var subprojectId = Guid.NewGuid();

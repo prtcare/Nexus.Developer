@@ -23,7 +23,8 @@ public sealed class Feature : AggregateRoot<FeatureId>
         string description,
         Guid createdByUserId,
         DateTimeOffset createdAt,
-        FeatureId? parentFeatureId = null)
+        FeatureId? parentFeatureId = null,
+        string? sourceRoadmapNodeId = null)
         : base(id)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
@@ -42,6 +43,9 @@ public sealed class Feature : AggregateRoot<FeatureId>
         CreatedByUserId = createdByUserId;
         CreatedAt = createdAt;
         ParentFeatureId = parentFeatureId;
+        SourceRoadmapNodeId = string.IsNullOrWhiteSpace(sourceRoadmapNodeId)
+            ? null
+            : sourceRoadmapNodeId.Trim();
     }
 
     private Feature(
@@ -53,7 +57,8 @@ public sealed class Feature : AggregateRoot<FeatureId>
         Guid createdByUserId,
         DateTimeOffset createdAt,
         string reference,
-        FeatureId? parentFeatureId = null)
+        FeatureId? parentFeatureId = null,
+        string? sourceRoadmapNodeId = null)
         : base(id)
     {
         SubprojectId = subprojectId;
@@ -64,6 +69,7 @@ public sealed class Feature : AggregateRoot<FeatureId>
         CreatedAt = createdAt;
         Reference = reference;
         ParentFeatureId = parentFeatureId;
+        SourceRoadmapNodeId = sourceRoadmapNodeId;
     }
 
     public SubprojectId SubprojectId { get; }
@@ -72,6 +78,15 @@ public sealed class Feature : AggregateRoot<FeatureId>
     // same Subproject; the database enforces parent-exists via the self-FK
     // FK_Feature_ParentFeature (Restrict).
     public FeatureId? ParentFeatureId { get; private set; }
+
+    // WU-02 narrow bridge (WAVE-05A Lane D): optional, external traceability only.
+    // Holds the roadmap-ledger NodeId string (e.g. "F-07-10", "WI-07-2.1.1") that
+    // originated this Feature when the roadmap importer (WI-07-1.1.3) wrote it.
+    // Never a Guid, never runtime identity, never routing authority, never a
+    // substitute for DevelopmentControlAddress. Plain external reference string;
+    // null for every Feature created without a roadmap origin. Set only at
+    // construction (blank -> null); carried through Restore.
+    public string? SourceRoadmapNodeId { get; }
 
     public string Title { get; private set; } = string.Empty;
 
@@ -96,8 +111,9 @@ public sealed class Feature : AggregateRoot<FeatureId>
         Guid createdByUserId,
         DateTimeOffset createdAt,
         string reference,
-        FeatureId? parentFeatureId = null)
-        => new(id, subprojectId, title, description, status, createdByUserId, createdAt, reference, parentFeatureId);
+        FeatureId? parentFeatureId = null,
+        string? sourceRoadmapNodeId = null)
+        => new(id, subprojectId, title, description, status, createdByUserId, createdAt, reference, parentFeatureId, sourceRoadmapNodeId);
 
     // Changes the feature's parent (null == promote to root). Takes the loaded
     // candidate parent so the self-parent and same-subproject rules can be

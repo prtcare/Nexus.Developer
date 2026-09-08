@@ -27,7 +27,8 @@ public sealed class CreateTaskHandler
             command.Title,
             command.Description,
             command.CreatedByUserId,
-            DateTimeOffset.UtcNow);
+            DateTimeOffset.UtcNow,
+            command.SourceRoadmapNodeId);
 
         await _repository.AddAsync(task, cancellationToken);
 
