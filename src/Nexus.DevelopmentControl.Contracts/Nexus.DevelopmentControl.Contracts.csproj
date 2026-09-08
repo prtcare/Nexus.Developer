@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <!--
+      Bootstrap-safe shared DevelopmentControl contract assembly (SP1-WAVE-04 Lane A).
+      The physical name is product-neutral (DevelopmentControl, not Developer) because the
+      R06 DevelopmentControl concept is cross-cutting and serves Foundation AND Products;
+      the public types deliberately KEEP their historical Nexus.Developer.Core.DevelopmentControl
+      namespace (no broad namespace rename this wave). Zero package/project references below:
+      this assembly is the only place Forge / any Foundation tool must reference to consume
+      DevelopmentControl value contracts, and it pulls in NO Excel/EF/DI/runtime.
+    -->
+    <RootNamespace>Nexus.Developer.Core</RootNamespace>
+    <AssemblyName>Nexus.DevelopmentControl.Contracts</AssemblyName>
+    <IsPackable>true</IsPackable>
+    <PackageId>Nexus.DevelopmentControl.Contracts</PackageId>
+    <Authors>PRT</Authors>
+    <Description>Nexus V2.3 - Layer 06 shared platform - bootstrap-safe DevelopmentControl value contracts (zero-IO, no Excel/EF/DI/runtime). Namespaces preserved from Nexus.Developer.Core.DevelopmentControl.</Description>
+  </PropertyGroup>
+
+</Project>
