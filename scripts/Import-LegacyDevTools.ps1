@@ -1,6 +1,6 @@
 [CmdletBinding(SupportsShouldProcess)]
 param(
-    [string] $SourceRoot = 'C:\Personal\DevTools',
+    [string] $SourceRoot = 'D:\NEXUS\Forge',
     [string] $DestinationRoot = (Split-Path $PSScriptRoot -Parent)
 )
 
