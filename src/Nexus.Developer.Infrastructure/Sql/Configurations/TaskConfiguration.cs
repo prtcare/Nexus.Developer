@@ -48,6 +48,15 @@ public sealed class TaskConfiguration : IEntityTypeConfiguration<DomainTask>
         builder.Property(task => task.CreatedAt)
             .IsRequired();
 
+        // WU-02 narrow bridge (WAVE-05A Lane D): external roadmap-ledger NodeId
+        // string, traceability only. Nullable (no Task has a roadmap origin yet);
+        // deliberately not indexed -- nothing reads in by it today, and the roadmap
+        // importer (WI-07-1.1.3) is the future single writer. Never a Guid, and
+        // distinct from MigratedFromWorkItemId (Chat WorkItem provenance below).
+        builder.Property(task => task.SourceRoadmapNodeId)
+            .HasMaxLength(200)
+            .IsRequired(false);
+
         // WI-07-10.2.1 migration provenance -- non-unique (a WorkItem maps to
         // exactly one Task by convention, but nothing here enforces that at the
         // database level; the migration script itself is the single writer).

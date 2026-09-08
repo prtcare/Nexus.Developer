@@ -28,6 +28,22 @@ public sealed class FeatureConfiguration : IEntityTypeConfiguration<DomainFeatur
         builder.HasIndex(feature => feature.SubprojectId)
             .HasDatabaseName("IX_Feature_SubprojectId");
 
+        // ParentFeatureId is Developer's own row: a real self-FK (the precedent is
+        // TaskConfiguration's FK_Task_Feature -> Restrict), not the opaque-index
+        // pattern used for the foreign SubprojectId. Children point up; NULL == root.
+        builder.Property(feature => feature.ParentFeatureId)
+            .HasConversion(StronglyTypedIdConverters.FeatureId)
+            .IsRequired(false);
+
+        builder.HasOne<DomainFeature>()
+            .WithMany()
+            .HasForeignKey(feature => feature.ParentFeatureId)
+            .HasConstraintName("FK_Feature_ParentFeature")
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(feature => feature.ParentFeatureId)
+            .HasDatabaseName("IX_Feature_ParentFeatureId");
+
         builder.Property(feature => feature.Title)
             .HasMaxLength(200)
             .IsRequired();
@@ -44,6 +60,14 @@ public sealed class FeatureConfiguration : IEntityTypeConfiguration<DomainFeatur
 
         builder.Property(feature => feature.CreatedAt)
             .IsRequired();
+
+        // WU-02 narrow bridge (WAVE-05A Lane D): external roadmap-ledger NodeId
+        // string, traceability only. Nullable (no Feature has a roadmap origin yet);
+        // deliberately not indexed -- nothing reads in by it today, and the roadmap
+        // importer (WI-07-1.1.3) is the future single writer. Never a Guid.
+        builder.Property(feature => feature.SourceRoadmapNodeId)
+            .HasMaxLength(200)
+            .IsRequired(false);
 
         builder.Property<int>("Seq")
             .ValueGeneratedOnAdd()
