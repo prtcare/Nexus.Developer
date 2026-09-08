@@ -17,15 +17,15 @@ $repositories = @{
     }
     "2" = @{
         Name = "Nexus.Platform"
-        Path = "C:\Personal\Nexus.Platform"
+        Path = "D:\NEXUS\Platform"
     }
     "3" = @{
         Name = "Nexus.Experience"
-        Path = "C:\Personal\Nexus.Experience"
+        Path = "D:\NEXUS\Products\Experience"
     }
     "4" = @{
         Name = "Nexus.Developer"
-        Path = "C:\Personal\Nexus.Developer"
+        Path = "D:\NEXUS\Products\Developer"
     }
 }
 
