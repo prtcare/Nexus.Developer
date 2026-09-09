@@ -61,3 +61,7 @@ set-openai-key.ps1
 
 # Excel lock files
 ~$*.xlsx
+
+# Governed Forge worktree admin (worktrees themselves are separate git
+# checkouts; keep the container out of status noise)
+.forge/
