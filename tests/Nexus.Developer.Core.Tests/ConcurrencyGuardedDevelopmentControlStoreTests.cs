@@ -205,6 +205,32 @@ public class ConcurrencyGuardedDevelopmentControlStoreTests
         Assert.False(outcome.Success);
     }
 
+    // SP1-W08 governed verify-and-record cycle (WI-07-0.2.4): the coordinator's stale
+    // RowVersion conflict is already covered by DevelopmentControlAtomicWriteCoordinatorTests,
+    // but the guarded store's STRUCTURED atomic surface (ExecuteAtomicWriteAsync) was not.
+    // A stale expected RowVersion on the decorator's atomic path must classify as
+    // ConcurrencyConflict and must NOT run the work unit against the inner store.
+    [Fact]
+    public async Task ExecuteAtomicWriteAsync_WithAStaleExpectedRowVersion_ReturnsConcurrencyConflictWithoutRunningTheWorkUnit()
+    {
+        var fake = new FakeDevelopmentControlStore();
+        fake.Current[T01.NodeId.Value] = T01; // current RowVersion is 3
+        var guard = new ConcurrencyGuardedDevelopmentControlStore(
+            fake, new NamedDevelopmentControlWriteLockFactory(), NewIdentity());
+
+        var result = await guard.ExecuteAtomicWriteAsync(new AtomicWriteRequest<Node>(
+            Identity: NewIdentity(), // the guarded store locks its OWN identity, not the request's
+            LockTimeout: TimeSpan.FromSeconds(5),
+            Envelope: Envelope(expectedRowVersion: 2), // stale: current RowVersion is 3
+            VerifyEntityNodeId: "T-01",
+            WorkUnit: store => store.UpdateNodeAsync(T01 with { Status = Status.Completed }, Envelope(expectedRowVersion: 2))));
+
+        Assert.Equal(DevelopmentControlConcurrencyOutcome.ConcurrencyConflict, result.Outcome);
+        Assert.False(result.Success);
+        Assert.Equal(3, ((Node)result.ConflictDetails!).RowVersion);
+        Assert.Equal(0, fake.MutatingCalls); // the stale atomic write never reached a mutation
+    }
+
     [Fact]
     public void ExposesItsIdentityTimeoutAndInnerStore()
     {
